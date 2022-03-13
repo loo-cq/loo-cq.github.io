@@ -6,12 +6,12 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="https://loo-cq.github.io">
-  <title>locq‘s blog</title>
+  <title>Archives: 2022/3 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="猫的纸箱">
 <meta property="og:type" content="website">
 <meta property="og:title" content="locq‘s blog">
-<meta property="og:url" content="https://loo-cq.github.io/index.html">
+<meta property="og:url" content="https://loo-cq.github.io/archives/2022/03/index.html">
 <meta property="og:site_name" content="locq‘s blog">
 <meta property="og:description" content="猫的纸箱">
 <meta property="og:locale" content="en_US">
@@ -142,395 +142,41 @@
           <div id="js-content" class="content-ll">
             
   
-    <article id="post-test" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
+  
     
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
+    
       
       
-      
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/03/13/test/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
+      <section class="archives-wrap">
+        <div class="archive-year-wrap">
+          <a href="/archives/2022" class="archive-year">2022</a>
         </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-xv6" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
+        <div class="archives">
     
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2022/02/15/xv6/">xv6编译指南</a>
-    </h1>
-  
-
-        
-        <a href="/2022/02/15/xv6/" class="archive-article-date">
-  	<time datetime="2022-02-15T15:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-02-15</time>
+    <article class="archive-article archive-type-post">
+  <div class="archive-article-inner">
+    <header class="archive-article-header">
+      	<div class="article-meta">
+	      	<a href="/2022/03/13/test/" class="archive-article-date">
+  	<time datetime="2022-03-13T17:09:11.576Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-13</time>
 </a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Ubuntu-qemu编译安装xv6"><a href="#Ubuntu-qemu编译安装xv6" class="headerlink" title="Ubuntu + qemu编译安装xv6"></a>Ubuntu + qemu编译安装xv6</h1><p>官方有给出各个系统相应的教程<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/tools.html">lab tools page</a>,下面是我自己的踩坑记录。</p>
-<h2 id="安装qemu"><a href="#安装qemu" class="headerlink" title="安装qemu"></a>安装qemu</h2><p>qemu既可以用编译安装，也可以直接用apt安装，我比较懒，所以dddd</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install qemu</span><br></pre></td></tr></table></figure>
+        </div>
+    	 
+        <div class="article-info info-on-right">
+          
+          
 
-<p>再执行这个</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install qemu-system-i386</span><br></pre></td></tr></table></figure>
-
-<p>尝试启动qemu</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-i386</span><br></pre></td></tr></table></figure>
-
-<p>出现下面界面就是安装成功了</p>
-<p><img src="/2022/02/15/xv6/1.png"></p>
-<h2 id="下载并编译xv6"><a href="#下载并编译xv6" class="headerlink" title="下载并编译xv6"></a>下载并编译xv6</h2><h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>官方的文档里给出的代码是</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git://pdos.csail.mit.edu/xv6/xv6.git</span><br></pre></td></tr></table></figure>
-
-<p>但是听说很多问题并且我访问不了，所以我用的是以下这个</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone https://github.com/mit-pdos/xv6-public</span><br></pre></td></tr></table></figure>
-
-<h3 id="安装依赖"><a href="#安装依赖" class="headerlink" title="安装依赖"></a>安装依赖</h3><p>需要的依赖有：</p>
-<ul>
-<li>gcc</li>
-<li>make</li>
-<li>Make-guile</li>
-</ul>
-<p>直接执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install gcc make make-guile</span><br></pre></td></tr></table></figure>
-
-<h3 id="编译"><a href="#编译" class="headerlink" title="编译"></a>编译</h3><p>进入目录直接执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make</span><br></pre></td></tr></table></figure>
-
-<h2 id="运行xv6"><a href="#运行xv6" class="headerlink" title="运行xv6"></a>运行xv6</h2><p>如果前面没有出错的话，这一步应该也不会出啥错误。直接在xv6目录下执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">make qemu</span><br></pre></td></tr></table></figure>
-
-<p><img src="/2022/02/15/xv6/2.png"></p>
-<p><strong>运行成功！！!</strong></p>
-<p>在命令行输入ls后，看到如下界面。这是<a href="/code/mkfs">mkfs.c</a>创建的系统分区的一些文件。大部分是熟悉的Linux命令。</p>
-<p><img src="/2022/02/15/xv6/3.png"></p>
-<p>xv6没有ps命令，可以用组合键Ctrl+p，打印有关每个进程的信息。</p>
-<p><img src="/2022/02/15/xv6/4.png"></p>
-<p>可以看到到两个：一个是init，另一个是sh。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/操作系统//" class="article-tag-list-link color5">操作系统</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/操作系统/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2022/02/15/xv6/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
+        </div>
+        <div class="clearfix"></div>
+    </header>
   </div>
 </article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
   
-    <article id="post-树莓派openEuler下安装yum" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
+  
+    </div></section>
+  
+
     
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/04/15/%E6%A0%91%E8%8E%93%E6%B4%BEopenEuler%E4%B8%8B%E5%AE%89%E8%A3%85yum/">树莓派openEuler下安装yum</a>
-    </h1>
-  
-
-        
-        <a href="/2021/04/15/%E6%A0%91%E8%8E%93%E6%B4%BEopenEuler%E4%B8%8B%E5%AE%89%E8%A3%85yum/" class="archive-article-date">
-  	<time datetime="2021-04-15T15:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-04-15</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="树莓派openEuler下安装yum"><a href="#树莓派openEuler下安装yum" class="headerlink" title="树莓派openEuler下安装yum"></a>树莓派openEuler下安装yum</h1><h2 id="修复yum"><a href="#修复yum" class="headerlink" title="修复yum"></a>修复yum</h2><p>貌似openEuler给我留下一个巨大的坑，输入yum会提示-bash：yum：command not found。需要自己手动安装下</p>
-<p>点击下载<a target="_blank" rel="noopener" href="https://repo.openeuler.org/openEuler-20.03-LTS-SP1/everything/aarch64/Packages/yum-4.2.23-3.oe1.noarch.rpm"><code>yum-4.2.23-3.oe1.noarch.rpm</code></a> ，并且放到树莓派上，然后在同目录下执行</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh yum-4.2.23-3.oe1.noarch.rpm</span><br></pre></td></tr></table></figure>
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/疑难杂症//" class="article-tag-list-link color5">疑难杂症</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/疑难杂症/openEUler//" class="article-tag-list-link color5">openEUler</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/04/15/%E6%A0%91%E8%8E%93%E6%B4%BEopenEuler%E4%B8%8B%E5%AE%89%E8%A3%85yum/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-ZeroTier配置moon节点" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/">ZeroTier配置moon节点</a>
-    </h1>
-  
-
-        
-        <a href="/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/" class="archive-article-date">
-  	<time datetime="2021-03-05T15:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h1><h2 id="1-安装ZeroTier并加入网络"><a href="#1-安装ZeroTier并加入网络" class="headerlink" title="1.安装ZeroTier并加入网络"></a>1.安装ZeroTier并加入网络</h2><p>moon也是要在你自己的网络里面，也就是说是你网络的moon。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl-s https://install.zerotier.com/ | sudo bash</span><br></pre></td></tr></table></figure>
-
-<p>加入网络。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli join [Your Network-ID]</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-给文件夹授权以及生成moon配置文件"><a href="#2-给文件夹授权以及生成moon配置文件" class="headerlink" title="2.给文件夹授权以及生成moon配置文件"></a>2.给文件夹授权以及生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 777 /var/lib/zerotier-one</span><br><span class="line">cd /var/lib/zerotier-one</span><br><span class="line">sudo zerotier-idtool initmoon identity.public &gt; moon.json </span><br></pre></td></tr></table></figure>
-
-<h2 id="3-修改moon的配置文件"><a href="#3-修改moon的配置文件" class="headerlink" title="3.修改moon的配置文件"></a>3.修改moon的配置文件</h2><p>配置文件路径：</p>
-<p><code>/var/lib/zerotier-one/moon.json</code></p>
-<p>主要是添加机器的公网ip，格式如下：</p>
-<p><code>Sample：&quot;stableEndpoints&quot;:[ &quot;ipv4address/9993&quot;,&quot;ipv6address/9993&quot; ]</code></p>
-<h2 id="4-生成moon配置文件"><a href="#4-生成moon配置文件" class="headerlink" title="4.生成moon配置文件"></a>4.生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo zerotier-idtool genmoon moon.json</span><br></pre></td></tr></table></figure>
-
-<p>然后就会生成一个 000000xxxxxx.moon的文件在<code>/var/lib/zerotier-one/</code>下。</p>
-<p>在&#x2F;var&#x2F;lib&#x2F;zerotier-one目录下,手动新建一个 moons.d 文件夹，并将刚生成的moon配置文件放到该文件夹下。</p>
-<p><code>mv 000000xxxxxx.moon moons.d/</code></p>
-<h2 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5.重启服务"></a>5.重启服务</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service zerotier-one restart </span><br><span class="line">/etc/init.d/zerotier-one restart</span><br><span class="line">service zerotier-one start </span><br><span class="line">zerotier-one -d </span><br><span class="line"><span class="meta">#</span><span class="language-bash">随便选一个，根据系统版本不同有些会无效</span></span><br></pre></td></tr></table></figure>
-
-<p>重启完成后服务端就搭建完成了。</p>
-<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><h2 id="1-添加配置文件"><a href="#1-添加配置文件" class="headerlink" title="1.添加配置文件"></a>1.添加配置文件</h2><h3 id="Linux："><a href="#Linux：" class="headerlink" title="Linux："></a>Linux：</h3><p>直接在zerotier目录下,创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>通常路径是：<code>/var/lib/zerotier-one/</code></p>
-<h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><p>也是在zerotier目录下创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>一般路径：<code>C:\ProgramData\ZeroTier\One\</code></p>
-<h3 id="Mac-OS"><a href="#Mac-OS" class="headerlink" title="Mac OS"></a>Mac OS</h3><p>同理，参考路径：<code>/Library/Application Support/ZeroTier/One</code></p>
-<p>记得重启服务</p>
-<h2 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h2><p>输入下面命令：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli listpeers</span><br></pre></td></tr></table></figure>
-
-<p>若有出现你的服务器IP地址,且后面标注是moon，即可证明moon连接成功</p>
-<h1 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h1><p>众所周知，ZeroTier走的是UDP，众众所周知，咱GFW对UDP特别敏感，流量一大就盖，不知道能稳定用多久哈哈哈。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-  
 
 
           </div>
@@ -552,9 +198,9 @@
     <script>
 	var yiliaConfig = {
 		mathjax: true,
-		isHome: true,
+		isHome: false,
 		isPost: false,
-		isArchive: false,
+		isArchive: true,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
