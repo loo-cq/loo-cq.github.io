@@ -6,20 +6,22 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>ZeroTier配置moon节点 | locq‘s blog</title>
+  <title>Wireshark调试chrome浏览器的https流量 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="服务端配置1.安装ZeroTier并加入网络moon也是要在你自己的网络里面，也就是说是你网络的moon。 1curl-s https:&#x2F;&#x2F;install.zerotier.com&#x2F; | sudo bash  加入网络。 1zerotier-cli join [Your Network-ID]  2.给文件夹授权以及生成moon配置文件123sudo chmod 777 &#x2F;var&#x2F;lib&#x2F;zero">
+  <meta name="description" content="Wireshark调试chrome浏览器的https流量虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程 随便弄个文件夹，把路径记下。  设置环境变量">
 <meta property="og:type" content="article">
-<meta property="og:title" content="ZeroTier配置moon节点">
-<meta property="og:url" content="http://locq.scnu.work/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/index.html">
+<meta property="og:title" content="Wireshark调试chrome浏览器的https流量">
+<meta property="og:url" content="http://locq.scnu.work/2021/03/05/wiresharkhttps/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="服务端配置1.安装ZeroTier并加入网络moon也是要在你自己的网络里面，也就是说是你网络的moon。 1curl-s https:&#x2F;&#x2F;install.zerotier.com&#x2F; | sudo bash  加入网络。 1zerotier-cli join [Your Network-ID]  2.给文件夹授权以及生成moon配置文件123sudo chmod 777 &#x2F;var&#x2F;lib&#x2F;zero">
+<meta property="og:description" content="Wireshark调试chrome浏览器的https流量虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程 随便弄个文件夹，把路径记下。  设置环境变量">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://locq.scnu.work/2021/03/05/wiresharkhttps/wireshake.png">
 <meta property="article:published_time" content="2021-03-05T15:38:20.000Z">
-<meta property="article:modified_time" content="2022-03-15T11:11:55.435Z">
+<meta property="article:modified_time" content="2022-03-15T17:00:14.345Z">
 <meta property="article:author" content="locq">
 <meta property="article:tag" content="教程">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://locq.scnu.work/2021/03/05/wiresharkhttps/wireshake.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -143,19 +145,19 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-ZeroTier配置moon节点" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="post-wiresharkhttps" class="article article-type-post " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      ZeroTier配置moon节点
+      Wireshark调试chrome浏览器的https流量
     </h1>
   
 
         
-        <a href="/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/" class="archive-article-date">
+        <a href="/2021/03/05/wiresharkhttps/" class="archive-article-date">
   	<time datetime="2021-03-05T15:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-05</time>
 </a>
         
@@ -163,41 +165,29 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h1><h2 id="1-安装ZeroTier并加入网络"><a href="#1-安装ZeroTier并加入网络" class="headerlink" title="1.安装ZeroTier并加入网络"></a>1.安装ZeroTier并加入网络</h2><p>moon也是要在你自己的网络里面，也就是说是你网络的moon。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl-s https://install.zerotier.com/ | sudo bash</span><br></pre></td></tr></table></figure>
+        <h1 id="Wireshark调试chrome浏览器的https流量"><a href="#Wireshark调试chrome浏览器的https流量" class="headerlink" title="Wireshark调试chrome浏览器的https流量"></a>Wireshark调试chrome浏览器的https流量</h1><h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
+<h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><ol>
+<li><p>随便弄个文件夹，把路径记下。</p>
+</li>
+<li><p>设置环境变量</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;\nexport SSLKEYLOGFILE=&quot;你的路径/sslkeylog.log“ &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</span><br></pre></td></tr></table></figure>
 
-<p>加入网络。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli join [Your Network-ID]</span><br></pre></td></tr></table></figure>
+<ol start="3">
+<li>在Wireshark设置密钥路径</li>
+</ol>
+<blockquote>
+<p>左上角 Wireshake &gt; Preferences &gt; Protocools &gt; TLS &gt; (Pre)-Master-Secret log filename</p>
+</blockquote>
+<p>把刚才的log文件选上</p>
+<p><img src="/2021/03/05/wiresharkhttps/wireshake.png"></p>
+<ol start="4">
+<li>通过命令行启动chrome</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --user-data-dir=&quot;你的路径/chrome&quot; --ssl-key-log-file=&quot;你的路径/sslkeylog.log&quot;</span><br></pre></td></tr></table></figure>
 
-<h2 id="2-给文件夹授权以及生成moon配置文件"><a href="#2-给文件夹授权以及生成moon配置文件" class="headerlink" title="2.给文件夹授权以及生成moon配置文件"></a>2.给文件夹授权以及生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 777 /var/lib/zerotier-one</span><br><span class="line">cd /var/lib/zerotier-one</span><br><span class="line">sudo zerotier-idtool initmoon identity.public &gt; moon.json </span><br></pre></td></tr></table></figure>
-
-<h2 id="3-修改moon的配置文件"><a href="#3-修改moon的配置文件" class="headerlink" title="3.修改moon的配置文件"></a>3.修改moon的配置文件</h2><p>配置文件路径：</p>
-<p><code>/var/lib/zerotier-one/moon.json</code></p>
-<p>主要是添加机器的公网ip，格式如下：</p>
-<p><code>Sample：&quot;stableEndpoints&quot;:[ &quot;ipv4address/9993&quot;,&quot;ipv6address/9993&quot; ]</code></p>
-<h2 id="4-生成moon配置文件"><a href="#4-生成moon配置文件" class="headerlink" title="4.生成moon配置文件"></a>4.生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo zerotier-idtool genmoon moon.json</span><br></pre></td></tr></table></figure>
-
-<p>然后就会生成一个 000000xxxxxx.moon的文件在<code>/var/lib/zerotier-one/</code>下。</p>
-<p>在&#x2F;var&#x2F;lib&#x2F;zerotier-one目录下,手动新建一个 moons.d 文件夹，并将刚生成的moon配置文件放到该文件夹下。</p>
-<p><code>mv 000000xxxxxx.moon moons.d/</code></p>
-<h2 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5.重启服务"></a>5.重启服务</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service zerotier-one restart </span><br><span class="line">/etc/init.d/zerotier-one restart</span><br><span class="line">service zerotier-one start </span><br><span class="line">zerotier-one -d </span><br><span class="line"><span class="meta">#</span><span class="language-bash">随便选一个，根据系统版本不同有些会无效</span></span><br></pre></td></tr></table></figure>
-
-<p>重启完成后服务端就搭建完成了。</p>
-<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><h2 id="1-添加配置文件"><a href="#1-添加配置文件" class="headerlink" title="1.添加配置文件"></a>1.添加配置文件</h2><p>发现一个新的命令，可以直接在客户端配置。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli orbit xxxxxx xxxxxx //xxxxxx对应的是上文000000xxxxxx.moon中的xxxxxx。</span><br></pre></td></tr></table></figure>
-
-<p>有了这个下面的都是废话啦。</p>
-<h3 id="Linux："><a href="#Linux：" class="headerlink" title="Linux："></a>Linux：</h3><p>直接在zerotier目录下,创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>通常路径是：<code>/var/lib/zerotier-one/</code></p>
-<h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><p>也是在zerotier目录下创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>一般路径：<code>C:\ProgramData\ZeroTier\One\</code></p>
-<h3 id="Mac-OS"><a href="#Mac-OS" class="headerlink" title="Mac OS"></a>Mac OS</h3><p>同理，参考路径：<code>/Library/Application Support/ZeroTier/One</code></p>
-<p>记得重启服务</p>
-<h2 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h2><p>输入下面命令：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli listpeers</span><br></pre></td></tr></table></figure>
-
-<p>若有出现你的服务器IP地址,且后面标注是moon，即可证明moon连接成功</p>
-<h1 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h1><p>众所周知，ZeroTier走的是UDP，众众所周知，咱GFW对UDP特别敏感，流量一大就盖，不知道能稳定用多久哈哈哈。不过也只有我这种服务器要过墙的穷人才要考虑的问题了。</p>
+<p>完事，继续你的抓包之旅吧。</p>
 
       
 
@@ -282,7 +272,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2021/03/05/ZeroTier%E9%85%8D%E7%BD%AEmoon%E8%8A%82%E7%82%B9/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2021/03/05/wiresharkhttps/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -296,11 +286,11 @@
   
 <nav id="article-nav">
   
-    <a href="/2021/04/15/%E6%A0%91%E8%8E%93%E6%B4%BEopenEuler%E4%B8%8B%E5%AE%89%E8%A3%85yum/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2021/03/05/ZeroTier-moon/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          树莓派openEuler下安装yum
+          ZeroTier配置moon节点
         
       </div>
     </a>
@@ -329,7 +319,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#%E6%9C%8D%E5%8A%A1%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-number">1.</span> <span class="toc-text">服务端配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E5%AE%89%E8%A3%85ZeroTier%E5%B9%B6%E5%8A%A0%E5%85%A5%E7%BD%91%E7%BB%9C"><span class="toc-number">1.1.</span> <span class="toc-text">1.安装ZeroTier并加入网络</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E7%BB%99%E6%96%87%E4%BB%B6%E5%A4%B9%E6%8E%88%E6%9D%83%E4%BB%A5%E5%8F%8A%E7%94%9F%E6%88%90moon%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">1.2.</span> <span class="toc-text">2.给文件夹授权以及生成moon配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#3-%E4%BF%AE%E6%94%B9moon%E7%9A%84%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">1.3.</span> <span class="toc-text">3.修改moon的配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#4-%E7%94%9F%E6%88%90moon%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">1.4.</span> <span class="toc-text">4.生成moon配置文件</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#5-%E9%87%8D%E5%90%AF%E6%9C%8D%E5%8A%A1"><span class="toc-number">1.5.</span> <span class="toc-text">5.重启服务</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E5%AE%A2%E6%88%B7%E7%AB%AF%E9%85%8D%E7%BD%AE"><span class="toc-number">2.</span> <span class="toc-text">客户端配置</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#1-%E6%B7%BB%E5%8A%A0%E9%85%8D%E7%BD%AE%E6%96%87%E4%BB%B6"><span class="toc-number">2.1.</span> <span class="toc-text">1.添加配置文件</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#Linux%EF%BC%9A"><span class="toc-number">2.1.1.</span> <span class="toc-text">Linux：</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Windows"><span class="toc-number">2.1.2.</span> <span class="toc-text">Windows</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#Mac-OS"><span class="toc-number">2.1.3.</span> <span class="toc-text">Mac OS</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#2-%E6%B5%8B%E8%AF%95"><span class="toc-number">2.2.</span> <span class="toc-text">2.测试</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#%E7%96%91%E6%83%91"><span class="toc-number">3.</span> <span class="toc-text">疑惑</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Wireshark%E8%B0%83%E8%AF%95chrome%E6%B5%8F%E8%A7%88%E5%99%A8%E7%9A%84https%E6%B5%81%E9%87%8F"><span class="toc-number">1.</span> <span class="toc-text">Wireshark调试chrome浏览器的https流量</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%BEBB"><span class="toc-number">1.0.1.</span> <span class="toc-text">虾BB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="toc-number">1.0.2.</span> <span class="toc-text">操作过程</span></a></li></ol></li></ol></li></ol>
                     </div>
                 </span>
             </div>
