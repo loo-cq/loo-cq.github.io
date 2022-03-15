@@ -16,7 +16,7 @@
 <meta property="og:description" content="服务端配置1.安装ZeroTier并加入网络moon也是要在你自己的网络里面，也就是说是你网络的moon。 1curl-s https:&#x2F;&#x2F;install.zerotier.com&#x2F; | sudo bash  加入网络。 1zerotier-cli join [Your Network-ID]  2.给文件夹授权以及生成moon配置文件123sudo chmod 777 &#x2F;var&#x2F;lib&#x2F;zero">
 <meta property="og:locale" content="en_US">
 <meta property="article:published_time" content="2021-03-05T15:38:20.000Z">
-<meta property="article:modified_time" content="2022-03-11T16:28:37.816Z">
+<meta property="article:modified_time" content="2022-03-15T11:11:55.435Z">
 <meta property="article:author" content="locq">
 <meta property="article:tag" content="教程">
 <meta name="twitter:card" content="summary">
@@ -183,7 +183,11 @@
 <h2 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5.重启服务"></a>5.重启服务</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service zerotier-one restart </span><br><span class="line">/etc/init.d/zerotier-one restart</span><br><span class="line">service zerotier-one start </span><br><span class="line">zerotier-one -d </span><br><span class="line"><span class="meta">#</span><span class="language-bash">随便选一个，根据系统版本不同有些会无效</span></span><br></pre></td></tr></table></figure>
 
 <p>重启完成后服务端就搭建完成了。</p>
-<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><h2 id="1-添加配置文件"><a href="#1-添加配置文件" class="headerlink" title="1.添加配置文件"></a>1.添加配置文件</h2><h3 id="Linux："><a href="#Linux：" class="headerlink" title="Linux："></a>Linux：</h3><p>直接在zerotier目录下,创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
+<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><h2 id="1-添加配置文件"><a href="#1-添加配置文件" class="headerlink" title="1.添加配置文件"></a>1.添加配置文件</h2><p>发现一个新的命令，可以直接在客户端配置。</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli orbit xxxxxx xxxxxx //xxxxxx对应的是上文000000xxxxxx.moon中的xxxxxx。</span><br></pre></td></tr></table></figure>
+
+<p>有了这个下面的都是废话啦。</p>
+<h3 id="Linux："><a href="#Linux：" class="headerlink" title="Linux："></a>Linux：</h3><p>直接在zerotier目录下,创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
 <p>通常路径是：<code>/var/lib/zerotier-one/</code></p>
 <h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><p>也是在zerotier目录下创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
 <p>一般路径：<code>C:\ProgramData\ZeroTier\One\</code></p>
@@ -193,7 +197,7 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli listpeers</span><br></pre></td></tr></table></figure>
 
 <p>若有出现你的服务器IP地址,且后面标注是moon，即可证明moon连接成功</p>
-<h1 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h1><p>众所周知，ZeroTier走的是UDP，众众所周知，咱GFW对UDP特别敏感，流量一大就盖，不知道能稳定用多久哈哈哈。</p>
+<h1 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h1><p>众所周知，ZeroTier走的是UDP，众众所周知，咱GFW对UDP特别敏感，流量一大就盖，不知道能稳定用多久哈哈哈。不过也只有我这种服务器要过墙的穷人才要考虑的问题了。</p>
 
       
 
