@@ -299,7 +299,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="树莓派openEuler下安装yum"><a href="#树莓派openEuler下安装yum" class="headerlink" title="树莓派openEuler下安装yum"></a>树莓派openEuler下安装yum</h1><h2 id="修复yum"><a href="#修复yum" class="headerlink" title="修复yum"></a>修复yum</h2><p>貌似openEuler给我留下一个巨大的坑，输入yum会提示-bash：yum：command not found。需要自己手动安装下</p>
+        <h2 id="修复yum"><a href="#修复yum" class="headerlink" title="修复yum"></a>修复yum</h2><p>貌似openEuler给我留下一个巨大的坑，输入yum会提示-bash：yum：command not found。需要自己手动安装下</p>
 <p>点击下载<a target="_blank" rel="noopener" href="https://repo.openeuler.org/openEuler-20.03-LTS-SP1/everything/aarch64/Packages/yum-4.2.23-3.oe1.noarch.rpm"><code>yum-4.2.23-3.oe1.noarch.rpm</code></a> ，并且放到树莓派上，然后在同目录下执行</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rpm -ivh yum-4.2.23-3.oe1.noarch.rpm</span><br></pre></td></tr></table></figure>
       
@@ -389,7 +389,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="Wireshark调试chrome浏览器的https流量"><a href="#Wireshark调试chrome浏览器的https流量" class="headerlink" title="Wireshark调试chrome浏览器的https流量"></a>Wireshark调试chrome浏览器的https流量</h1><h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
+        <h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
 <h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><ol>
 <li><p>随便弄个文件夹，把路径记下。</p>
 </li>
@@ -405,7 +405,7 @@
 <p>左上角 Wireshake &gt; Preferences &gt; Protocools &gt; TLS &gt; (Pre)-Master-Secret log filename</p>
 </blockquote>
 <p>把刚才的log文件选上</p>
-<p><img src="/2021/03/16/wiresharkhttps/wireshake.png"></p>
+<p><img src="/wiresharkhttps/wireshake.png"></p>
 <ol start="4">
 <li>通过命令行启动chrome</li>
 </ol>
