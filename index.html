@@ -369,6 +369,117 @@
 
 
   
+    <article id="post-wiresharkhttps" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/03/16/wiresharkhttps/">Wireshark调试chrome浏览器的https流量</a>
+    </h1>
+  
+
+        
+        <a href="/2021/03/16/wiresharkhttps/" class="archive-article-date">
+  	<time datetime="2021-03-16T01:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Wireshark调试chrome浏览器的https流量"><a href="#Wireshark调试chrome浏览器的https流量" class="headerlink" title="Wireshark调试chrome浏览器的https流量"></a>Wireshark调试chrome浏览器的https流量</h1><h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
+<h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><ol>
+<li><p>随便弄个文件夹，把路径记下。</p>
+</li>
+<li><p>设置环境变量</p>
+</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;\nexport SSLKEYLOGFILE=&quot;你的路径/sslkeylog.log“ &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</span><br></pre></td></tr></table></figure>
+
+<ol start="3">
+<li>在Wireshark设置密钥路径</li>
+</ol>
+<blockquote>
+<p>左上角 Wireshake &gt; Preferences &gt; Protocools &gt; TLS &gt; (Pre)-Master-Secret log filename</p>
+</blockquote>
+<p>把刚才的log文件选上</p>
+<p><img src="/2021/03/16/wiresharkhttps/wireshake.png"></p>
+<ol start="4">
+<li>通过命令行启动chrome</li>
+</ol>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --user-data-dir=&quot;你的路径/chrome&quot; --ssl-key-log-file=&quot;你的路径/sslkeylog.log&quot;</span><br></pre></td></tr></table></figure>
+
+<p>完事，继续你的抓包之旅吧。</p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/03/16/wiresharkhttps/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-ZeroTier-moon" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -463,117 +574,6 @@
       
         <p class="article-more-link">
           <a class="article-more-a" href="/2021/03/05/ZeroTier-moon/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
-    <article id="post-wiresharkhttps" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/03/05/wiresharkhttps/">Wireshark调试chrome浏览器的https流量</a>
-    </h1>
-  
-
-        
-        <a href="/2021/03/05/wiresharkhttps/" class="archive-article-date">
-  	<time datetime="2021-03-05T15:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="Wireshark调试chrome浏览器的https流量"><a href="#Wireshark调试chrome浏览器的https流量" class="headerlink" title="Wireshark调试chrome浏览器的https流量"></a>Wireshark调试chrome浏览器的https流量</h1><h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
-<h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><ol>
-<li><p>随便弄个文件夹，把路径记下。</p>
-</li>
-<li><p>设置环境变量</p>
-</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;\nexport SSLKEYLOGFILE=&quot;你的路径/sslkeylog.log“ &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</span><br></pre></td></tr></table></figure>
-
-<ol start="3">
-<li>在Wireshark设置密钥路径</li>
-</ol>
-<blockquote>
-<p>左上角 Wireshake &gt; Preferences &gt; Protocools &gt; TLS &gt; (Pre)-Master-Secret log filename</p>
-</blockquote>
-<p>把刚才的log文件选上</p>
-<p><img src="/2021/03/05/wiresharkhttps/wireshake.png"></p>
-<ol start="4">
-<li>通过命令行启动chrome</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --user-data-dir=&quot;你的路径/chrome&quot; --ssl-key-log-file=&quot;你的路径/sslkeylog.log&quot;</span><br></pre></td></tr></table></figure>
-
-<p>完事，继续你的抓包之旅吧。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/03/05/wiresharkhttps/">展开全文 >></a>
         </p>
       
 
