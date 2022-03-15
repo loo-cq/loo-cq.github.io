@@ -8,20 +8,20 @@
   <link rel="dns-prefetch" href="http://locq.scnu.work">
   <title>Wireshark调试chrome浏览器的https流量 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程 随便弄个文件夹，把路径记下。  设置环境变量   1echo &quot;\nexport SSLKE">
+  <meta name="description" content="虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程1.随便弄个文件夹，把路径记下。2.设置环境变量1echo &quot;\nexport SSLKEYL">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Wireshark调试chrome浏览器的https流量">
 <meta property="og:url" content="http://locq.scnu.work/2022/03/16/wiresharkhttps/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程 随便弄个文件夹，把路径记下。  设置环境变量   1echo &quot;\nexport SSLKE">
+<meta property="og:description" content="虾BB计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。 操作过程1.随便弄个文件夹，把路径记下。2.设置环境变量1echo &quot;\nexport SSLKEYL">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://locq.scnu.work/wiresharkhttps/wireshake.png">
+<meta property="og:image" content="http://locq.scnu.work/wiresharkhttps/1.png">
 <meta property="article:published_time" content="2022-03-16T01:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-15T17:12:24.583Z">
+<meta property="article:modified_time" content="2022-03-15T17:14:39.772Z">
 <meta property="article:author" content="locq">
 <meta property="article:tag" content="教程">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://locq.scnu.work/wiresharkhttps/wireshake.png">
+<meta name="twitter:image" content="http://locq.scnu.work/wiresharkhttps/1.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -166,26 +166,14 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="虾BB"><a href="#虾BB" class="headerlink" title="虾BB"></a>虾BB</h3><p>计网实验要求用 Wireshark 练习抓包，发现怎么抓也抓不到想要的 http 包而且抓到的 http 都很少。因为服务器都是 https 加密的链接，Wireshark 没有再次设置的情况下是没有办法抓到包的 https 的数据包。那差点以为我的 Wireshark 寄了。。</p>
-<h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><ol>
-<li><p>随便弄个文件夹，把路径记下。</p>
-</li>
-<li><p>设置环境变量</p>
-</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;\nexport SSLKEYLOGFILE=&quot;你的路径/sslkeylog.log“ &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</span><br></pre></td></tr></table></figure>
+<h3 id="操作过程"><a href="#操作过程" class="headerlink" title="操作过程"></a>操作过程</h3><h4 id="1-随便弄个文件夹，把路径记下。"><a href="#1-随便弄个文件夹，把路径记下。" class="headerlink" title="1.随便弄个文件夹，把路径记下。"></a>1.随便弄个文件夹，把路径记下。</h4><h4 id="2-设置环境变量"><a href="#2-设置环境变量" class="headerlink" title="2.设置环境变量"></a>2.设置环境变量</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">echo &quot;\nexport SSLKEYLOGFILE=&quot;你的路径/sslkeylog.log“ &gt;&gt; ~/.zshrc &amp;&amp; source ~/.zshrc</span><br></pre></td></tr></table></figure>
 
-<ol start="3">
-<li>在Wireshark设置密钥路径</li>
-</ol>
-<blockquote>
+<h4 id="3-在Wireshark设置密钥路径"><a href="#3-在Wireshark设置密钥路径" class="headerlink" title="3.在Wireshark设置密钥路径"></a>3.在Wireshark设置密钥路径</h4><blockquote>
 <p>左上角 Wireshake &gt; Preferences &gt; Protocools &gt; TLS &gt; (Pre)-Master-Secret log filename</p>
 </blockquote>
 <p>把刚才的log文件选上</p>
-<p><img src="/wiresharkhttps/wireshake.png"></p>
-<ol start="4">
-<li>通过命令行启动chrome</li>
-</ol>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --user-data-dir=&quot;你的路径/chrome&quot; --ssl-key-log-file=&quot;你的路径/sslkeylog.log&quot;</span><br></pre></td></tr></table></figure>
+<p><img src="/wiresharkhttps/1.png"></p>
+<h4 id="4-通过命令行启动chrome"><a href="#4-通过命令行启动chrome" class="headerlink" title="4.通过命令行启动chrome"></a>4.通过命令行启动chrome</h4><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --user-data-dir=&quot;你的路径/chrome&quot; --ssl-key-log-file=&quot;你的路径/sslkeylog.log&quot;</span><br></pre></td></tr></table></figure>
 
 <p>完事，继续你的抓包之旅吧。</p>
 
@@ -315,7 +303,7 @@
                 </span>
                 <span class="tooltip-content">
                     <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%BEBB"><span class="toc-number">1.</span> <span class="toc-text">虾BB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">操作过程</span></a></li></ol>
+                    <ol class="toc"><li class="toc-item toc-level-3"><a class="toc-link" href="#%E8%99%BEBB"><span class="toc-number">1.</span> <span class="toc-text">虾BB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#%E6%93%8D%E4%BD%9C%E8%BF%87%E7%A8%8B"><span class="toc-number">2.</span> <span class="toc-text">操作过程</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#1-%E9%9A%8F%E4%BE%BF%E5%BC%84%E4%B8%AA%E6%96%87%E4%BB%B6%E5%A4%B9%EF%BC%8C%E6%8A%8A%E8%B7%AF%E5%BE%84%E8%AE%B0%E4%B8%8B%E3%80%82"><span class="toc-number">2.1.</span> <span class="toc-text">1.随便弄个文件夹，把路径记下。</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#2-%E8%AE%BE%E7%BD%AE%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F"><span class="toc-number">2.2.</span> <span class="toc-text">2.设置环境变量</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#3-%E5%9C%A8Wireshark%E8%AE%BE%E7%BD%AE%E5%AF%86%E9%92%A5%E8%B7%AF%E5%BE%84"><span class="toc-number">2.3.</span> <span class="toc-text">3.在Wireshark设置密钥路径</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#4-%E9%80%9A%E8%BF%87%E5%91%BD%E4%BB%A4%E8%A1%8C%E5%90%AF%E5%8A%A8chrome"><span class="toc-number">2.4.</span> <span class="toc-text">4.通过命令行启动chrome</span></a></li></ol></li></ol>
                     </div>
                 </span>
             </div>
