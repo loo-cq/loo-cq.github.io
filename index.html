@@ -469,6 +469,113 @@
 
 
   
+    <article id="post-nginx" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2021/03/16/nginx/">nginx添加stream模块的折腾记录</a>
+    </h1>
+  
+
+        
+        <a href="/2021/03/16/nginx/" class="archive-article-date">
+  	<time datetime="2021-03-16T01:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-16</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>这是一个折腾记录，仅作为一个冒泡水文，肯定有很多不严谨的地方，只是一个分享哈哈哈，也恳请大家指出错误。</p>
+<h1 id="nginx添加stream模块以及改用trojan的折腾记录"><a href="#nginx添加stream模块以及改用trojan的折腾记录" class="headerlink" title="nginx添加stream模块以及改用trojan的折腾记录"></a>nginx添加stream模块以及改用trojan的折腾记录</h1><p>总所周知，我们一般使用一些手段来绕过公司的网管来达到上班摸鱼的目的，比如shadowsocket，v2ray，trojan等等，（暂且不算新出的那些）。shadowsockeet当称得上是暴力美学，然而太过暴力了。但是在我现用的v2ray颇显臃肿。所以便有了萌生换上trojan的想法。我的nginx上还挂了http业务（用于博客的反向代理什么的），习惯了用nginx收敛流量后自然而然的想着用用nginx来代理trojan。但是trojan是跑在第七层下面的，没办法用http代理。所以这次打算用到stream模块来实现这个功能，恰巧我的nginx当初编译的时候<strong>没！有！带上！这个！模块！！！</strong>但是问题也并不是很难解决总结其起来就是以下几个步骤</p>
+<h3 id="1-查看原来nginx所有模块，避免之前的业务出问题"><a href="#1-查看原来nginx所有模块，避免之前的业务出问题" class="headerlink" title="1.查看原来nginx所有模块，避免之前的业务出问题"></a>1.查看原来nginx所有模块，避免之前的业务出问题</h3><p>这个异常简单只需要一条命令</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -V</span><br></pre></td></tr></table></figure>
+
+<p>如果不能顺利执行，就把详细的路径打上，一般在nginx的安装目录下的sbin目录里。</p>
+<p>示例</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/nginx/sbin/nginx -V</span><br></pre></td></tr></table></figure>
+
+<h3 id="2-重新下载nginx源码并编译"><a href="#2-重新下载nginx源码并编译" class="headerlink" title="2.重新下载nginx源码并编译"></a>2.重新下载nginx源码并编译</h3><p>去自己信任的地方下载源码，比如国外某大型同性交友网站。然后解压到src里面，用.&#x2F;config设置编译的一些参数（比如安装路径什么的），别忘了带上上面看到的模块。</p>
+<p>然后我就是在这里遇到一个坑：编译的时候死活找不到OpenSSL。我用的是openssl-1.1.1g，前前后后经历过改路径，手动修改conf里面的路径，都无法解决。最后我细思一想，这个模块好像也没什么用，所以就取消了。</p>
+<h3 id="3-安装配置trojan"><a href="#3-安装配置trojan" class="headerlink" title="3.安装配置trojan"></a>3.安装配置trojan</h3><p>这个也是选择合适的方式安装trojan，trojan的配置就不赘述了。主要是贴一下nginx的配置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#示例</span><br><span class="line">stream &#123;</span><br><span class="line">    # 这里就是 SNI 识别，将域名映射成一个配置名</span><br><span class="line">    map $ssl_preread_server_name $backend_name &#123;</span><br><span class="line">        web.cn.chengxiaobai web;</span><br><span class="line">        vmess.cn.chengxiaobai vmess;</span><br><span class="line">        trojan.cn.chengxiaobai trojan;</span><br><span class="line">    # 域名都不匹配情况下的默认值</span><br><span class="line">        default web;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # web，配置转发详情</span><br><span class="line">    upstream web &#123;</span><br><span class="line">        server 127.0.0.1:10240;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # trojan，配置转发详情</span><br><span class="line">    upstream trojan &#123;</span><br><span class="line">        server 127.0.0.1:10241;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # vmess，配置转发详情</span><br><span class="line">    upstream vmess &#123;</span><br><span class="line">        server 127.0.0.1:10242;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # 监听 443 并开启 ssl_preread</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 443 reuseport;</span><br><span class="line">        listen [::]:443 reuseport;</span><br><span class="line">        proxy_pass  $backend_name;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#参考CSDN博主「你懂我意思吧」</span><br></pre></td></tr></table></figure>
+
+<h3 id="0-stream模块的妙用"><a href="#0-stream模块的妙用" class="headerlink" title="0.stream模块的妙用"></a>0.stream模块的妙用</h3><p>既然咱辛辛苦苦的把stream加上去，咱们不得用它干点别的什么别的事情。比如反代内网的ssh服务</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#示例</span><br><span class="line">stream &#123; </span><br><span class="line">	#stream模块，就跟http模块一样 </span><br><span class="line">	upstream ssh &#123;</span><br><span class="line">		server 192.168.195.206:22;   #IP+Port</span><br><span class="line">	&#125;</span><br><span class="line">	server &#123; </span><br><span class="line">		#里面可以有多个监听服务</span><br><span class="line">		#配置监听端口和代理的ip和端口就可以进行tcp代理了。 </span><br><span class="line">		listen 5022;  #外层通信需要的tcp端口</span><br><span class="line">		proxy_pass ssh;</span><br><span class="line">		proxy_connect_timeout 1h;</span><br><span class="line">		proxy_timeout 1h;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#来源：CSDN博主「gaojun6854」</span><br><span class="line">#配置根据自己需要修改</span><br></pre></td></tr></table></figure>
+<p>当然理论上大部分网络服务都可以通过stream转发，这里就留给大家想象空间啦。</p>
+<hr>
+<p>最后是厚脸皮贴链接 <a target="_blank" rel="noopener" href="http://www.luchengqin.com/">www.luchengqin.com</a></p>
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2021/03/16/nginx/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-ZeroTier-moon" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
