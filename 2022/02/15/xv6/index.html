@@ -8,24 +8,23 @@
   <link rel="dns-prefetch" href="http://locq.scnu.work">
   <title>xv6编译指南 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Ubuntu + qemu编译安装xv6官方有给出各个系统相应的教程lab tools page,下面是我自己的踩坑记录。 安装qemuqemu既可以用编译安装，也可以直接用apt安装，我比较懒，所以dddd 1sudo apt-get install qemu  再执行这个 1sudo apt install qemu-system-i386  尝试启动qemu 1qemu-system-i38">
+  <meta name="description" content="Ubuntu + qemu编译安装xv6官方有给出各个系统相应的教程lab tools page,下面是我自己的踩坑记录。 安装qemuqemu既可以用编译安装，也可以直接用apt安装，我比较懒，所以dddd 1sudo apt-get install qemu  再执行这个 1sudo apt-get install git build-essential gdb-multiarch qemu-">
 <meta property="og:type" content="article">
 <meta property="og:title" content="xv6编译指南">
 <meta property="og:url" content="http://locq.scnu.work/2022/02/15/xv6/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="Ubuntu + qemu编译安装xv6官方有给出各个系统相应的教程lab tools page,下面是我自己的踩坑记录。 安装qemuqemu既可以用编译安装，也可以直接用apt安装，我比较懒，所以dddd 1sudo apt-get install qemu  再执行这个 1sudo apt install qemu-system-i386  尝试启动qemu 1qemu-system-i38">
+<meta property="og:description" content="Ubuntu + qemu编译安装xv6官方有给出各个系统相应的教程lab tools page,下面是我自己的踩坑记录。 安装qemuqemu既可以用编译安装，也可以直接用apt安装，我比较懒，所以dddd 1sudo apt-get install qemu  再执行这个 1sudo apt-get install git build-essential gdb-multiarch qemu-">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://locq.scnu.work/2022/02/15/xv6/1.png">
 <meta property="og:image" content="http://locq.scnu.work/2022/02/15/xv6/2.png">
 <meta property="og:image" content="http://locq.scnu.work/2022/02/15/xv6/3.png">
 <meta property="og:image" content="http://locq.scnu.work/2022/02/15/xv6/4.png">
 <meta property="og:image" content="http://locq.scnu.work/2022/02/15/xv6/5.png">
 <meta property="article:published_time" content="2022-02-15T15:38:20.000Z">
-<meta property="article:modified_time" content="2022-03-22T07:27:59.844Z">
+<meta property="article:modified_time" content="2022-03-22T07:41:49.425Z">
 <meta property="article:author" content="locq">
 <meta property="article:tag" content="记录">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://locq.scnu.work/2022/02/15/xv6/1.png">
+<meta name="twitter:image" content="http://locq.scnu.work/2022/02/15/xv6/2.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -174,13 +173,8 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install qemu</span><br></pre></td></tr></table></figure>
 
 <p>再执行这个</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install qemu-system-i386</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu </span><br></pre></td></tr></table></figure>
 
-<p>尝试启动qemu</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-i386</span><br></pre></td></tr></table></figure>
-
-<p>出现下面界面就是安装成功了</p>
-<p><img src="/2022/02/15/xv6/1.png"></p>
 <h2 id="下载并编译xv6"><a href="#下载并编译xv6" class="headerlink" title="下载并编译xv6"></a>下载并编译xv6</h2><h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>官方的文档里给出的代码是</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git clone git://g.csail.mit.edu/xv6-labs-2021</span><br></pre></td></tr></table></figure>
 <p>但但但是<code>clone</code>下来的是个空文件夹，这是为啥呢</p>

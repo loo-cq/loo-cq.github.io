@@ -465,13 +465,8 @@
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install qemu</span><br></pre></td></tr></table></figure>
 
 <p>再执行这个</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install qemu-system-i386</span><br></pre></td></tr></table></figure>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install git build-essential gdb-multiarch qemu-system-misc gcc-riscv64-linux-gnu binutils-riscv64-linux-gnu </span><br></pre></td></tr></table></figure>
 
-<p>尝试启动qemu</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">qemu-system-i386</span><br></pre></td></tr></table></figure>
-
-<p>出现下面界面就是安装成功了</p>
-<p><img src="/2022/02/15/xv6/1.png"></p>
 <h2 id="下载并编译xv6"><a href="#下载并编译xv6" class="headerlink" title="下载并编译xv6"></a>下载并编译xv6</h2><h3 id="下载"><a href="#下载" class="headerlink" title="下载"></a>下载</h3><p>官方的文档里给出的代码是</p>
 <figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">git clone git clone git://g.csail.mit.edu/xv6-labs-2021</span><br></pre></td></tr></table></figure>
 <p>但但但是<code>clone</code>下来的是个空文件夹，这是为啥呢</p>
