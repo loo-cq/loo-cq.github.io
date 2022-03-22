@@ -17,7 +17,7 @@
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="https://img-blog.csdnimg.cn/22f6e4b1dd5944e5bf5f2bea059aa211.png">
 <meta property="article:published_time" content="2022-03-22T07:27:09.000Z">
-<meta property="article:modified_time" content="2022-03-22T12:13:59.044Z">
+<meta property="article:modified_time" content="2022-03-22T12:20:26.310Z">
 <meta property="article:author" content="locq">
 <meta property="article:tag" content="记录">
 <meta name="twitter:card" content="summary">
@@ -212,6 +212,7 @@
 
 <h3 id="primes"><a href="#primes" class="headerlink" title="primes"></a>primes</h3><p>使用管道将 2 至 35 中的素数筛选出来，这个想法归功于 Unix 管道的发明者 Doug McIlroy 。链接中间的图片和周围的文字解释了如何操作。最后的解决方案应该放在 user&#x2F;primes.c 文件中。<br>你的目标是使用 pipe 和 fork 来创建管道。第一个进程将数字 2 到 35 送入管道中。对于每个质数，你要安排创建一个进程，从其左邻通过管道读取，并在另一条管道上写给右邻。由于 xv6 的文件描述符和进程数量有限，第一个进程可以停止在 35 。</p>
 <p>Some hints:</p>
+<blockquote>
 <ul>
 <li>Be careful to close file descriptors that a process doesn’t need, because otherwise your program will run xv6 out of resources before the first process reaches 35.</li>
 <li>Once the first process reaches 35, it should wait until the entire pipeline terminates, including all children, grandchildren, &amp;c. Thus the main primes process should only exit after all the output has been printed, and after all the other primes processes have exited.</li>
@@ -220,7 +221,7 @@
 <li>You should create the processes in the pipeline only as they are needed.</li>
 <li>Add the program to <code>UPROGS</code> in Makefile.</li>
 </ul>
-<p>这个过程有点像<strong>素数筛生成的过程</strong>，大概是将数字全部输入到最左边的管道，然后第一个进程打印出输入管道的第一个数 2 ，并将管道中所有 2 的倍数的数剔除。接着把剔除后的所有数字输入到右边的管道，然后第二个进程打印出从第一个进程中传入管道的第一个数 3 ，并将管道中所有 3 的倍数的数剔除。接着重复以上过程，最终打印出来的数都为素数。</p>
+</blockquote>
 <p><img src="https://img-blog.csdnimg.cn/22f6e4b1dd5944e5bf5f2bea059aa211.png" alt="22f6e4b1dd5944e5bf5f2bea059aa211"></p>
 <p>参考 xv6 手册第一章的 Pipes 部分，其中的例子演示了运行程序 wc ，由此受到启发，可以使用文件描述符重定向技巧，避免 xv6 的文件描述符限制所带来的影响。所以，学习示例代码，先写一个重定向函数 mapping ，虽然叫重定向，但感觉还是称为映射比较好，原理就是关闭当前进程的某个文件描述符，把管道的读端或者写端的描述符通过 dup 函数复制给刚刚关闭的文件描述符，再把管道描述符关闭，节约了资源。</p>
 <p>首先创建文件描述符和创建一个管道，再创建一个子进程，子进程把管道的写端口描述符映射到原来的描述符标准输出 1 上。循环通过 write 系统调用把 2 到 35 写入管道。父进程等待子进程把数据写入完毕后，父进程把管道的读端口描述符映射到原来的描述符标准输入 0 上。在编写一个 primes 函数，调用此函数实现递归筛选的过程。</p>
