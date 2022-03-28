@@ -6,19 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>locq‘s blog</title>
+  <title>正文 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="第3章陷入，中断和驱动程序运行进程时，cpu 一直处于一个大循环中：取指，更新 PC，执行，取指……。但有些情况下用户程序需要进入内核，而不是执行下一条用户指令。这些情况包括设备信号的发出、用户程序的非法操作（例如引用一个找不到页表项的虚拟地址）。处理这些情况面临三大挑战：1）内核必须使处理器能够从用户态转换到内核态（并且再转换回用户态）2）内核和设备必须协调好他们并行的活动。3）内核必须知道硬件">
 <meta property="og:type" content="website">
-<meta property="og:title" content="locq‘s blog">
+<meta property="og:title" content="正文">
 <meta property="og:url" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.html">
 <meta property="og:site_name" content="locq‘s blog">
 <meta property="og:description" content="第3章陷入，中断和驱动程序运行进程时，cpu 一直处于一个大循环中：取指，更新 PC，执行，取指……。但有些情况下用户程序需要进入内核，而不是执行下一条用户指令。这些情况包括设备信号的发出、用户程序的非法操作（例如引用一个找不到页表项的虚拟地址）。处理这些情况面临三大挑战：1）内核必须使处理器能够从用户态转换到内核态（并且再转换回用户态）2）内核和设备必须协调好他们并行的活动。3）内核必须知道硬件">
 <meta property="og:locale" content="en_US">
 <meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-1.png">
 <meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-2.png">
-<meta property="article:published_time" content="2022-03-28T05:07:30.649Z">
-<meta property="article:modified_time" content="2022-03-28T05:07:30.641Z">
+<meta property="article:published_time" content="2022-03-28T02:46:23.000Z">
+<meta property="article:modified_time" content="2022-03-28T05:15:51.198Z">
 <meta property="article:author" content="locq">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-1.png">
@@ -148,6 +148,21 @@
             <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      正文
+    </h1>
+  
+
+        
+        <a href="/xv6-chinese-book/content/chapter3.html" class="archive-article-date">
+  	<time datetime="2022-03-28T02:46:23.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-28</time>
+</a>
+        
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
         <h2 id="第3章"><a href="#第3章" class="headerlink" title="第3章"></a>第3章</h2><h3 id="陷入，中断和驱动程序"><a href="#陷入，中断和驱动程序" class="headerlink" title="陷入，中断和驱动程序"></a>陷入，中断和驱动程序</h3><p>运行进程时，cpu 一直处于一个大循环中：取指，更新 PC，执行，取指……。但有些情况下用户程序需要进入内核，而不是执行下一条用户指令。这些情况包括设备信号的发出、用户程序的非法操作（例如引用一个找不到页表项的虚拟地址）。处理这些情况面临三大挑战：1）内核必须使处理器能够从用户态转换到内核态（并且再转换回用户态）2）内核和设备必须协调好他们并行的活动。3）内核必须知道硬件接口的细节。解决这三个问题需要对硬件的深入理解和小心翼翼的编程，并且有可能导致难以理解的内核代码。这一章告诉你 xv6 是如何解决这些问题的。</p>
@@ -235,11 +250,14 @@
 <p>有些设备动态地在轮询模式和中断模式之间切换，因为使用中断的成本很高，但是在驱动去处理一个事件之前，使用轮询会导致延迟。举个例子，对于一个收到大量包的网络设备来说，可能会从中断模式到轮询模式之间切换，因为它知道会到来更多的包被处理，使用轮询会降低处理它们的成本。一旦没有更多的包需要处理了，驱动可能就会切换回中断模式，使得当有新的包到来的时候能够被立刻通知。</p>
 <p>IDE 硬盘的驱动静态的发送中断到一个特定的处理器上。有些驱动使用了复杂的算法来发送中断，使得处理负载均衡，并且达到良好的局部性。例如，一个网络驱动程序可能为一个网络连接的包向处理这个连接的处理器发送一个中断，而来自其他连接的包的中断发送给另外的处理器。这种分配方式很复杂；例如，如果有某些网络连接的活动时间很短，但是其他的网络连接却很长，这时候操作系统就要保持所有的处理器都工作来获得一个高的吞吐量。</p>
 <p>用户在读一个文件的时候，这个文件的数据将会被拷贝两次。第一次是由驱动从硬盘拷贝到内核内存，之后通过 read 系统调用，从内核内存拷贝到用户内存。同理当在网络上发送数据的时候，数据也是被拷贝了两次：先是从用户内存到内核空间，然后是从内核空间拷贝到网络设备。对于很多程序来说低延迟是相当重要的（比如说 Web 服务器服务一个静态页面），操作系统使用了一些特别的代码来避免这种多次拷贝。一个在真实世界中的例子就是缓冲区大小通常是符合内存页大小的，这使得只读的数据拷贝可以直接通过分页映射到进程的地址空间，而不用任何的复制。</p>
-<h3 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h3><ol>
-<li>在 <code>syscall()</code> 的第一条指令处设置一个断点来截获第一次系统调用（例如 <code>br syscall</code>）。此时栈上有一些什么值？解释这个断点下执行 <code>x/37x $esp</code> 的输出，对每一个值说明它的含义（如为 trap 保存的 %ebp，trapframe.eip，临时分配空间等等）。</li>
-<li>添加一个新的系统调用</li>
-<li>添加一个网络驱动</li>
-</ol>
+<h3 id="练习"><a href="#练习" class="headerlink" title="练习"></a>练习</h3><ul>
+<li><p>在 <code>syscall()</code> 的第一条指令处设置一个断点来截获第一次系统调用（例如 <code>br syscall</code>）。此时栈上有一些什么值？解释这个断点下执行 <code>x/37x $esp</code> 的输出，对每一个值说明它的含义（如为 trap 保存的 %ebp，trapframe.eip，临时分配空间等等）。</p>
+</li>
+<li><p>添加一个新的系统调用</p>
+</li>
+<li><p>添加一个网络驱动</p>
+</li>
+</ul>
 
       
 
