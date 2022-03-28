@@ -6,19 +6,18 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>nginx添加stream模块的折腾记录 | locq‘s blog</title>
+  <title>站内资料 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="这是一个折腾记录，仅作为一个冒泡水文，肯定有很多不严谨的地方，只是一个分享哈哈哈，也恳请大家指出错误。 nginx添加stream模块以及改用trojan的折腾记录总所周知，我们一般使用一些手段来绕过公司的网管来达到上班摸鱼的目的，比如shadowsocket，v2ray，trojan等等，（暂且不算新出的那些）。shadowsockeet当称得上是暴力美学，然而太过暴力了。但是在我现用的v2ra">
-<meta property="og:type" content="article">
-<meta property="og:title" content="nginx添加stream模块的折腾记录">
-<meta property="og:url" content="http://locq.scnu.work/2021/03/16/nginx/index.html">
+  <meta name="description" content="xv6-book中文版">
+<meta property="og:type" content="website">
+<meta property="og:title" content="站内资料">
+<meta property="og:url" content="http://locq.scnu.work/library/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="这是一个折腾记录，仅作为一个冒泡水文，肯定有很多不严谨的地方，只是一个分享哈哈哈，也恳请大家指出错误。 nginx添加stream模块以及改用trojan的折腾记录总所周知，我们一般使用一些手段来绕过公司的网管来达到上班摸鱼的目的，比如shadowsocket，v2ray，trojan等等，（暂且不算新出的那些）。shadowsockeet当称得上是暴力美学，然而太过暴力了。但是在我现用的v2ra">
+<meta property="og:description" content="xv6-book中文版">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2021-03-16T01:00:00.000Z">
-<meta property="article:modified_time" content="2022-03-19T03:13:40.519Z">
+<meta property="article:published_time" content="2022-03-28T08:05:49.000Z">
+<meta property="article:modified_time" content="2022-03-28T08:08:12.375Z">
 <meta property="article:author" content="locq">
-<meta property="article:tag" content="教程">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
@@ -149,45 +148,27 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article id="post-nginx" class="article article-type-post " itemscope itemprop="blogPost">
+            <article id="page-" class="article article-type-page " itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <header class="article-header">
         
   
     <h1 class="article-title" itemprop="name">
-      nginx添加stream模块的折腾记录
+      站内资料
     </h1>
   
 
         
-        <a href="/2021/03/16/nginx/" class="archive-article-date">
-  	<time datetime="2021-03-16T01:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-16</time>
+        <a href="/library/index.html" class="archive-article-date">
+  	<time datetime="2022-03-28T08:05:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-28</time>
 </a>
         
       </header>
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>这是一个折腾记录，仅作为一个冒泡水文，肯定有很多不严谨的地方，只是一个分享哈哈哈，也恳请大家指出错误。</p>
-<h1 id="nginx添加stream模块以及改用trojan的折腾记录"><a href="#nginx添加stream模块以及改用trojan的折腾记录" class="headerlink" title="nginx添加stream模块以及改用trojan的折腾记录"></a>nginx添加stream模块以及改用trojan的折腾记录</h1><p>总所周知，我们一般使用一些手段来绕过公司的网管来达到上班摸鱼的目的，比如shadowsocket，v2ray，trojan等等，（暂且不算新出的那些）。shadowsockeet当称得上是暴力美学，然而太过暴力了。但是在我现用的v2ray颇显臃肿。所以便有了萌生换上trojan的想法。我的nginx上还挂了http业务（用于博客的反向代理什么的），习惯了用nginx收敛流量后自然而然的想着用用nginx来代理trojan。但是trojan是跑在第七层下面的，没办法用http代理。所以这次打算用到stream模块来实现这个功能，恰巧我的nginx当初编译的时候<strong>没！有！带上！这个！模块！！！</strong>但是问题也并不是很难解决总结其起来就是以下几个步骤</p>
-<h3 id="1-查看原来nginx所有模块，避免之前的业务出问题"><a href="#1-查看原来nginx所有模块，避免之前的业务出问题" class="headerlink" title="1.查看原来nginx所有模块，避免之前的业务出问题"></a>1.查看原来nginx所有模块，避免之前的业务出问题</h3><p>这个异常简单只需要一条命令</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">nginx -V</span><br></pre></td></tr></table></figure>
-
-<p>如果不能顺利执行，就把详细的路径打上，一般在nginx的安装目录下的sbin目录里。</p>
-<p>示例</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">/usr/local/nginx/sbin/nginx -V</span><br></pre></td></tr></table></figure>
-
-<h3 id="2-重新下载nginx源码并编译"><a href="#2-重新下载nginx源码并编译" class="headerlink" title="2.重新下载nginx源码并编译"></a>2.重新下载nginx源码并编译</h3><p>去自己信任的地方下载源码，比如国外某大型同性交友网站。然后解压到src里面，用.&#x2F;config设置编译的一些参数（比如安装路径什么的），别忘了带上上面看到的模块。</p>
-<p>然后我就是在这里遇到一个坑：编译的时候死活找不到OpenSSL。我用的是openssl-1.1.1g，前前后后经历过改路径，手动修改conf里面的路径，都无法解决。最后我细思一想，这个模块好像也没什么用，所以就取消了。</p>
-<h3 id="3-安装配置trojan"><a href="#3-安装配置trojan" class="headerlink" title="3.安装配置trojan"></a>3.安装配置trojan</h3><p>这个也是选择合适的方式安装trojan，trojan的配置就不赘述了。主要是贴一下nginx的配置</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br></pre></td><td class="code"><pre><span class="line">#示例</span><br><span class="line">stream &#123;</span><br><span class="line">    # 这里就是 SNI 识别，将域名映射成一个配置名</span><br><span class="line">    map $ssl_preread_server_name $backend_name &#123;</span><br><span class="line">        web.cn.chengxiaobai web;</span><br><span class="line">        vmess.cn.chengxiaobai vmess;</span><br><span class="line">        trojan.cn.chengxiaobai trojan;</span><br><span class="line">    # 域名都不匹配情况下的默认值</span><br><span class="line">        default web;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # web，配置转发详情</span><br><span class="line">    upstream web &#123;</span><br><span class="line">        server 127.0.0.1:10240;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # trojan，配置转发详情</span><br><span class="line">    upstream trojan &#123;</span><br><span class="line">        server 127.0.0.1:10241;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # vmess，配置转发详情</span><br><span class="line">    upstream vmess &#123;</span><br><span class="line">        server 127.0.0.1:10242;</span><br><span class="line">    &#125;</span><br><span class="line"></span><br><span class="line">    # 监听 443 并开启 ssl_preread</span><br><span class="line">    server &#123;</span><br><span class="line">        listen 443 reuseport;</span><br><span class="line">        listen [::]:443 reuseport;</span><br><span class="line">        proxy_pass  $backend_name;</span><br><span class="line">        ssl_preread on;</span><br><span class="line">    &#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"></span><br><span class="line">#参考CSDN博主「你懂我意思吧」</span><br></pre></td></tr></table></figure>
-
-<h3 id="0-stream模块的妙用"><a href="#0-stream模块的妙用" class="headerlink" title="0.stream模块的妙用"></a>0.stream模块的妙用</h3><p>既然咱辛辛苦苦的把stream加上去，咱们不得用它干点别的什么别的事情。比如反代内网的ssh服务</p>
-<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line">#示例</span><br><span class="line">stream &#123; </span><br><span class="line">	#stream模块，就跟http模块一样 </span><br><span class="line">	upstream ssh &#123;</span><br><span class="line">		server 192.168.195.206:22;   #IP+Port</span><br><span class="line">	&#125;</span><br><span class="line">	server &#123; </span><br><span class="line">		#里面可以有多个监听服务</span><br><span class="line">		#配置监听端口和代理的ip和端口就可以进行tcp代理了。 </span><br><span class="line">		listen 5022;  #外层通信需要的tcp端口</span><br><span class="line">		proxy_pass ssh;</span><br><span class="line">		proxy_connect_timeout 1h;</span><br><span class="line">		proxy_timeout 1h;</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line">#来源：CSDN博主「gaojun6854」</span><br><span class="line">#配置根据自己需要修改</span><br></pre></td></tr></table></figure>
-<p>当然理论上大部分网络服务都可以通过stream转发，这里就留给大家想象空间啦。</p>
-<hr>
-<p>最后是厚脸皮贴链接 <a target="_blank" rel="noopener" href="http://www.luchengqin.com/">www.luchengqin.com</a></p>
+        <p><a href="/xv6-chinese-book">xv6-book中文版</a></p>
 
       
 
@@ -196,33 +177,7 @@
     <div class="article-info article-info-index">
       
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
 
       
 
@@ -272,7 +227,7 @@
     <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
     <p>扫一扫，分享到微信</p>
     <div class="wx-qrcode">
-      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2021/03/16/nginx/" alt="微信分享二维码">
+      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/library/" alt="微信分享二维码">
     </div>
 </div>
 
@@ -284,25 +239,6 @@
 </article>
 
   
-<nav id="article-nav">
-  
-    <a href="/2021/04/15/openEulerFixyum/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          树莓派openEuler下安装yum
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2021/03/05/ZeroTier-moon/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">ZeroTier配置moon节点</div>
-      <i class="icon-circle-right"></i>
-    </a>
-  
-</nav>
-
 
 <aside class="wrap-side-operation">
     <div class="mod-side-operation">
@@ -316,19 +252,6 @@
             </div>
         </div>
         
-        
-        <div class="toc-container tooltip-left">
-            <i class="icon-font icon-category"></i>
-            <div class="tooltip tooltip-east">
-                <span class="tooltip-item">
-                </span>
-                <span class="tooltip-content">
-                    <div class="toc-article">
-                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#nginx%E6%B7%BB%E5%8A%A0stream%E6%A8%A1%E5%9D%97%E4%BB%A5%E5%8F%8A%E6%94%B9%E7%94%A8trojan%E7%9A%84%E6%8A%98%E8%85%BE%E8%AE%B0%E5%BD%95"><span class="toc-number">1.</span> <span class="toc-text">nginx添加stream模块以及改用trojan的折腾记录</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#1-%E6%9F%A5%E7%9C%8B%E5%8E%9F%E6%9D%A5nginx%E6%89%80%E6%9C%89%E6%A8%A1%E5%9D%97%EF%BC%8C%E9%81%BF%E5%85%8D%E4%B9%8B%E5%89%8D%E7%9A%84%E4%B8%9A%E5%8A%A1%E5%87%BA%E9%97%AE%E9%A2%98"><span class="toc-number">1.0.1.</span> <span class="toc-text">1.查看原来nginx所有模块，避免之前的业务出问题</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#2-%E9%87%8D%E6%96%B0%E4%B8%8B%E8%BD%BDnginx%E6%BA%90%E7%A0%81%E5%B9%B6%E7%BC%96%E8%AF%91"><span class="toc-number">1.0.2.</span> <span class="toc-text">2.重新下载nginx源码并编译</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#3-%E5%AE%89%E8%A3%85%E9%85%8D%E7%BD%AEtrojan"><span class="toc-number">1.0.3.</span> <span class="toc-text">3.安装配置trojan</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#0-stream%E6%A8%A1%E5%9D%97%E7%9A%84%E5%A6%99%E7%94%A8"><span class="toc-number">1.0.4.</span> <span class="toc-text">0.stream模块的妙用</span></a></li></ol></li></ol></li></ol>
-                    </div>
-                </span>
-            </div>
-        </div>
         
     </div>
 </aside>
@@ -366,7 +289,7 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: true,
+		isPost: false,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
