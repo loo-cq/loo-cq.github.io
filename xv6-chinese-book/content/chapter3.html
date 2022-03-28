@@ -15,13 +15,13 @@
 <meta property="og:site_name" content="locq‘s blog">
 <meta property="og:description" content="第3章陷入，中断和驱动程序运行进程时，cpu 一直处于一个大循环中：取指，更新 PC，执行，取指……。但有些情况下用户程序需要进入内核，而不是执行下一条用户指令。这些情况包括设备信号的发出、用户程序的非法操作（例如引用一个找不到页表项的虚拟地址）。处理这些情况面临三大挑战：1）内核必须使处理器能够从用户态转换到内核态（并且再转换回用户态）2）内核和设备必须协调好他们并行的活动。3）内核必须知道硬件">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/pic/f3-1.png">
-<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/pic/f3-2.png">
-<meta property="article:published_time" content="2022-03-19T03:16:13.577Z">
-<meta property="article:modified_time" content="2020-03-31T02:24:07.000Z">
+<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-1.png">
+<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-2.png">
+<meta property="article:published_time" content="2022-03-28T05:07:30.649Z">
+<meta property="article:modified_time" content="2022-03-28T05:07:30.641Z">
 <meta property="article:author" content="locq">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/pic/f3-1.png">
+<meta name="twitter:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter3.htm/f3-1.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -174,7 +174,7 @@
 <li>设置 %cs 和 %eip 为描述符中的值。</li>
 </ul>
 <p>int 指令是一个非常复杂的指令，可能有人会问是不是所有的这些操作都是必要的。检查 CPL &lt;&#x3D; DPL 使得内核可以禁止一些特权级系统调用。例如，如果用户成功执行了 int 指令，那么 DPL 必须是 3。如果用户程序没有合适的特权级，那么 int 指令就会触发 int 13，这是一个通用保护错误。再举一个例子，int 指令不能使用用户栈来保存值，因为用户可能还没有建立一个合适的栈，因此硬件会使用任务段中指定的栈（这个栈在内核模式中建立）。</p>
-<p><img src="/xv6-chinese-book/content/chapter3.htm/pic/f3-1.png" alt="figure3-1"></p>
+<p><img src="/xv6-chinese-book/content/chapter3.htm/f3-1.png" alt="figure3-1"></p>
 <p>图 3-1 展示了一个 int 指令之后的栈的情况，注意这是发生了特权级转换（即描述符中的特权级比 CPL 中的特权级低的时候）栈的情况。如果这条指令没有导致特权级转换，x86 就不会保存 %ss 和 %esp。在任何一种情况下，%eip 都指向中断描述符表中指定的地址，这个地址的第一条指令就是将要执行的下一条指令，也是 int n 的中断处理程序的第一条指令。操作系统应该实现这些中断处理程序，之后我们会看到 xv6 干了些什么。</p>
 <p>操作系统可以使用 iret 指令来从一个 int 指令中返回。它从栈中弹出 int 指令保存的值，然后通过恢复保存的 %eip 的值来继续用户程序的执行。</p>
 <h3 id="代码：第一个系统调用"><a href="#代码：第一个系统调用" class="headerlink" title="代码：第一个系统调用"></a>代码：第一个系统调用</h3><p>第一章的最后在 <code>initcode.S</code> 中调用了一个系统调用。让我们再看一遍（7713）。这个进程将 <code>exec</code> 所需的参数压栈，然后把系统调用号存在 %eax 中。这个系统调用号和 syscalls 数组中的条目匹配，（syscall 是一个函数指针的数组）（3350）。我们需要设法使得 int 指令将处理器的状态从用户模式切换到内核模式，调用适当的内核函数（例如在这里是 <code>sys_exec</code>），并且使内核可以取出 <code>sys_exec</code> 的参数。接下来的几个小节将描述 xv6 是如何做到这一点的，你会发现我们可以用同样的代码来实现中断和异常。</p>
@@ -186,7 +186,7 @@
 <p>当内陷发生时，处理器会做下面一些事。如果处理器在用户模式下运行，它会从任务段描述符中加载 %esp 和 %ss，把老的 %ss 和 %esp 压入新的栈中。如果处理器在内核模式下运行，上面的事件就不会发生。处理器接下来会把 %eflags，%cs，%eip 压栈。对于某些内陷来说，处理器会压入一个错误字。而后，处理器从相应 IDT 表项中加载新的 %eip 和 %cs。</p>
 <p>xv6 使用一个 perl 脚本（2950）来产生 IDT 表项指向的中断处理函数入口点。每一个入口都会压入一个错误码（如果 CPU 没有压入的话），压入中断号，然后跳转到 <code>alltraps</code>。</p>
 <p><code>Alltraps</code>（3004）继续保存处理器的寄存器：它压入 %ds, %es, %fs, %gs, 以及通用寄存器（3005-3010)。这么做使得内核栈上压入一个 <code>trapframe</code>（中断帧） 结构体，这个结构体包含了中断发生时处理器的寄存器状态（参见图3-2）。处理器负责压入 %ss，%esp，%eflags，%cs 和 %eip。处理器或者中断入口会压入一个错误码，而<code>alltraps</code>负责压入剩余的。中断帧包含了所有处理器从当前进程的内核态恢复到用户态需要的信息，所以处理器可以恰如中断开始时那样继续执行。回顾一下第一章，<code>userinit</code>通过手动建立中断帧来达到这个目标（参见图1-3）。</p>
-<p><img src="/xv6-chinese-book/content/chapter3.htm/pic/f3-2.png" alt="figure3-2"></p>
+<p><img src="/xv6-chinese-book/content/chapter3.htm/f3-2.png" alt="figure3-2"></p>
 <p>考虑第一个系统调用，被保存的 %eip 是 int 指令下一条指令的地址。%cs 是用户代码段选择符。%eflags 是执行 int 指令时的 eflags 寄存器，<code>alltraps</code> 同时也保存 %eax，它存有系统调用号，内核在之后会使用到它。</p>
 <p>现在用户态的寄存器都保存了，<code>alltraps</code> 可以完成对处理器的设置并开始执行内核的 C 代码。处理器在进入中断处理程序之前设置选择符 %cs 和 %ss；<code>alltraps</code> 设置 %ds 和 %es（3013-3015）。它设置 %fs 和 %gs 来指向 <code>SEG_KCPU</code>（每个 CPU 数据段选择符）（3016-3018）。</p>
 <p>一旦段设置好了，<code>alltraps</code> 就可以调用 C 中断处理程序 <code>trap</code> 了。它压入 %esp 作为 <code>trap</code> 的参数，%esp 指向刚在栈上建立好的中断帧（3021）。然后它调用 <code>trap</code>（3022）。trap 返回后，<code>alltraps</code> 弹出栈上的参数（3023）然后执行标号为 <code>trapret</code> 处的代码。我们在第一章阐述第一个用户进程的时候跟踪分析了这段代码，在那里第一个用户进程通过执行 <code>trapret</code> 处的代码来退出到用户空间。同样地事情在这里也发生：弹出中断帧会恢复用户模式下的寄存器，然后执行 iret 会跳回到用户空间。</p>

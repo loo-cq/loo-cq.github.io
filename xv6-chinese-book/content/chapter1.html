@@ -15,14 +15,14 @@
 <meta property="og:site_name" content="locq‘s blog">
 <meta property="og:description" content="第1章第一个进程本章通过第一个进程的创建来解释 xv6 是如何开始运行的，让我们得以一窥 xv6 提供的各个抽象是如何实现和交互的。xv6 尽量复用了普通操作的代码来建立第一个进程，避免单独为其撰写代码。接下来的各小节中，我们将详细探索其中的奥秘。 xv6 可以运行在搭载 Intel 80386 及其之后（即”x86”）处理器的 PC 上，因而许多底层功能（例如虚存的实现）是 x86 处理器专有的">
 <meta property="og:locale" content="en_US">
-<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/pic/f1-1.png">
-<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/pic/f1-2.png">
-<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/pic/f1-3.png">
-<meta property="article:published_time" content="2022-03-20T06:08:47.830Z">
-<meta property="article:modified_time" content="2020-03-31T02:24:07.000Z">
+<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/f1-1.png">
+<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/f1-2.png">
+<meta property="og:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/f1-3.png">
+<meta property="article:published_time" content="2022-03-28T05:06:55.821Z">
+<meta property="article:modified_time" content="2022-03-28T05:06:54.330Z">
 <meta property="article:author" content="locq">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/pic/f1-1.png">
+<meta name="twitter:image" content="http://locq.scnu.work/xv6-chinese-book/content/chapter1.htm/f1-1.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -155,7 +155,7 @@
 <p>xv6 可以运行在搭载 Intel 80386 及其之后（即”x86”）处理器的 PC 上，因而许多底层功能（例如虚存的实现）是 x86 处理器专有的。本书假设读者已有些许在一些体系结构上进行机器级编程的经验。我们将在有关 x86 专有概念出现时，对其进行介绍。另外，附录 A 中简要地描述了 PC 平台的整体架构。</p>
 <h4 id="进程概览"><a href="#进程概览" class="headerlink" title="进程概览"></a>进程概览</h4><p>进程是一个抽象概念，它让一个程序可以假设它独占一台机器。进程向程序提供“看上去”私有的，其他进程无法读写的内存系统（或地址空间），以及一颗“看上去”仅执行该程序的CPU。</p>
 <p>xv6 使用页表（由硬件实现）来为每个进程提供其独有的地址空间。页表将<em>虚拟地址</em>（x86 指令所使用的地址）翻译（或说“映射”）为<em>物理地址</em>（处理器芯片向主存发送的地址）。</p>
-<p><img src="/xv6-chinese-book/content/chapter1.htm/pic/f1-1.png" alt="figure1-1"></p>
+<p><img src="/xv6-chinese-book/content/chapter1.htm/f1-1.png" alt="figure1-1"></p>
 <p>xv6 为每个进程维护了不同的页表，这样就能够合理地定义进程的地址空间了。如图表1-1所示，一片地址空间包含了从虚拟地址0开始的<em>用户内存</em>。它的地址最低处放置进程的指令，接下来则是全局变量，栈区，以及一个用户可按需拓展的“堆”区（malloc 用）。</p>
 <p>和上面提到的<em>用户内存</em>一样，内核的指令和数据也会被进程映射到每个进程的地址空间中。当进程使用系统调用时，系统调用实际上会在进程地址空间中的内核区域执行。这种设计使得内核的系统调用代码可以直接指向用户内存。为了给用户留下足够的内存空间，xv6 将内核映射到了地址空间的高地址处，即从 0x80100000 开始。</p>
 <p>xv6 使用结构体 <code>struct proc</code> (2103) 来维护一个进程的众多状态。一个进程最为重要的状态是进程的页表，内核栈，当前运行状态。我们接下来会用 <code>p-&gt;xxx</code> 来指代 <code>proc</code> 结构中的元素。</p>
@@ -164,7 +164,7 @@
 <p>当进程使用系统调用时，处理器转入内核栈中，提升硬件的特权级，然后运行系统调用对应的内核代码。当系统调用完成时，又从内核空间回到用户空间：降低硬件特权级，转入用户栈，恢复执行系统调用指令后面的那条用户指令。线程可以在内核中“阻塞”，等待 I&#x2F;O, 在 I&#x2F;O 结束后再恢复运行。</p>
 <p><code>p-&gt;state</code> 指示了进程的状态：新建、准备运行、运行、等待 I&#x2F;O 或退出状态中。</p>
 <p><code>p-&gt;pgdir</code> 以 x86 硬件要求的格式保存了进程的页表。xv6 让分页硬件在进程运行时使用 <code>p-&gt;pgdir</code>。进程的页表还记录了保存进程内存的物理页的地址。</p>
-<h4 id="代码：第一个地址空间"><a href="#代码：第一个地址空间" class="headerlink" title="代码：第一个地址空间"></a>代码：第一个地址空间</h4><p><img src="/xv6-chinese-book/content/chapter1.htm/pic/f1-2.png" alt="figure1-2"></p>
+<h4 id="代码：第一个地址空间"><a href="#代码：第一个地址空间" class="headerlink" title="代码：第一个地址空间"></a>代码：第一个地址空间</h4><p><img src="/xv6-chinese-book/content/chapter1.htm/f1-2.png" alt="figure1-2"></p>
 <p>当 PC 开机时，它会初始化自己然后从磁盘中载入 <em>boot loader</em> 到内存并运行。附录 B 介绍了其具体细节。然后，<em>boot loader</em> 把 xv6 内核从磁盘中载入并从 <code>entry</code>（1040）开始运行。x86 的分页硬件在此时还没有开始工作；所以这时的虚拟地址是直接映射到物理地址上的。</p>
 <p>boot loader 把 xv6 内核装载到物理地址 0x100000 处。之所以没有装载到内核指令和内核数据应该出现的 0x80100000，是因为小型机器上很可能没有这么大的物理内存。而之所以在 0x100000 而不是 0x0 则是因为地址 0xa0000 到 0x100000 是属于 I&#x2F;O 设备的。</p>
 <p>为了让内核的剩余部分能够运行，<code>entry</code> 的代码设置了页表，将 0x80000000（称为 <code>KERNBASE</code>（0207））开始的虚拟地址映射到物理地址 0x0 处。注意，页表经常会这样把两段不同的虚拟内存映射到相同的一段物理内存，我们将会看到更多类似的例子。</p>
@@ -172,7 +172,7 @@
 <p>让我们回到 <code>entry</code> 中继续页表的设置工作，它将 <code>entrypgdir</code> 的物理地址载入到控制寄存器 <code>%cr3</code> 中。分页硬件必须知道 <code>entrypgdir</code> 的物理地址，因为此时它还不知道如何翻译虚拟地址；它也还没有页表。<code>entrypgdir</code> 这个符号指向内存的高地址处，但只要用宏 <code>V2P_WO</code>（0220）减去 <code>KERNBASE</code> 便可以找到其物理地址。为了让分页硬件运行起来， xv6 会设置控制寄存器 <code>%cr0</code> 中的标志位 <code>CR0_PG</code>。</p>
 <p>现在 <code>entry</code> 就要跳转到内核的 C 代码，并在内存的高地址中执行它了。首先它将栈指针 <code>%esp</code> 指向被用作栈的一段内存（1054）。所有的符号包括 <code>stack</code> 都在高地址，所以当低地址的映射被移除时，栈仍然是可用的。最后 <code>entry</code> 跳转到高地址的 <code>main</code> 代码中。我们必须使用间接跳转，否则汇编器会生成 PC 相关的直接跳转（PC-relative direct jump），而该跳转会运行在内存低地址处的 <code>main</code>。 <code>main</code> 不会返回，因为栈上并没有返回 PC 值。好了，现在内核已经运行在高地址处的函数 <code>main</code>（1217）中了。</p>
 <h4 id="代码：创建第一个进程"><a href="#代码：创建第一个进程" class="headerlink" title="代码：创建第一个进程"></a>代码：创建第一个进程</h4><p>在 <code>main</code> 初始化了一些设备和子系统后，它通过调用 <code>userinit</code>（1239）建立了第一个进程。<code>userinit</code> 首先调用 <code>allocproc</code>。<code>allocproc</code>（2205）的工作是在页表中分配一个槽（即结构体 <code>struct proc</code>），并初始化进程的状态，为其内核线程的运行做准备。注意一点：<code>userinit</code> 仅仅在创建第一个进程时被调用，而 <code>allocproc</code> 创建每个进程时都会被调用。<code>allocproc</code> 会在 <code>proc</code> 的表中找到一个标记为 <code>UNUSED</code>(2211-2213)的槽位。当它找到这样一个未被使用的槽位后，<code>allocproc</code> 将其状态设置为 <code>EMBRYO</code>，使其被标记为被使用的并给这个进程一个独有的 <code>pid</code>（2201-2219）。接下来，它尝试为进程的内核线程分配内核栈。如果分配失败了，<code>allocproc</code> 会把这个槽位的状态恢复为 <code>UNUSED</code> 并返回0以标记失败。</p>
-<p><img src="/xv6-chinese-book/content/chapter1.htm/pic/f1-3.png" alt="figure1-3"></p>
+<p><img src="/xv6-chinese-book/content/chapter1.htm/f1-3.png" alt="figure1-3"></p>
 <p>现在 <code>allocproc</code> 必须设置新进程的内核栈，<code>allocproc</code> 以巧妙的方式，使其既能在创建第一个进程时被使用，又能在 <code>fork</code> 操作时被使用。<code>allocproc</code> 为新进程设置好一个特别准备的内核栈和一系列内核寄存器，使得进程第一次运行时会“返回”到用户空间。准备好的内核栈就像图表1-3展示的那样。<code>allocproc</code> 通过设置返回程序计数器的值，使得新进程的内核线程首先运行在 <code>forkret</code> 的代码中，然后返回到 <code>trapret</code>（2236-2241）中运行。内核线程会从 <code>p-&gt;context</code> 中拷贝的内容开始运行。所以我们可以通过将 <code>p-&gt;context-&gt;eip</code> 指向 <code>forkret</code> 从而让内核线程从 <code>forkret</code>（2533）的开头开始运行。这个函数会返回到那个时刻栈底的地址。<code>context switch</code>（2708）的代码把栈指针指向 <code>p-&gt;context</code> 结尾。<code>allocproc</code> 又将 <code>p-&gt;context</code> 放在栈上，并在其上方放一个指向 <code>trapret</code> 的指针；这样运行完的 <code>forkret</code> 就会返回到 <code>trapret</code> 中了。 <code>trapret</code> 接着从栈顶恢复用户寄存器然后跳转到用户进程执行。这样的设置对于普通的 <code>fork</code> 和建立第一个进程都是适用的，虽然后一种情况进程会从用户空间的地址0处开始执行而非真正的从 <code>fork</code> 返回。</p>
 <p>我们将会在第3章看到，将控制权从用户转到内核是通过中断机制实现的，中断具体地说是系统调用、中断和异常。每当进程运行中要将控制权交给内核时，硬件和 xv6 的 <code>trap entry</code> 代码就会在进程的内核栈上保存用户寄存器。 <code>userinit</code> 把值写在新建的栈的顶部，使之就像进程是通过中断进入内核的一样（2264-2270）。所以用于从内核返回到用户代码的通用代码也就能适用于第一个进程。这些保存的值就构成了一个结构体 <code>struct trapframe</code>，其中保存的是用户寄存器。现在如图表1-3所示，进程的内核栈已经完全准备好了。</p>
 <p>第一个进程会先运行一个小程序（<code>initcode.S</code>（7700）），于是进程需要找到物理内存来保存这段程序。程序不仅需要被拷贝到内存中，还需要页表来指向那段内存。</p>
