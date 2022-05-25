@@ -148,6 +148,146 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-xv6-lab4" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/05/26/xv6-lab4/">MIT6.S081 — Lab3</a>
+    </h1>
+  
+
+        
+        <a href="/2022/05/26/xv6-lab4/" class="archive-article-date">
+  	<time datetime="2022-05-25T19:40:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-26</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Lab-traps"><a href="#Lab-traps" class="headerlink" title="Lab: traps"></a>Lab: traps</h1><h2 id="实验内容"><a href="#实验内容" class="headerlink" title="实验内容"></a>实验内容</h2><h3 id="RISC-V-assembly"><a href="#RISC-V-assembly" class="headerlink" title="RISC-V assembly"></a>RISC-V assembly</h3><p>了解一些RISC-V指令集非常重要，这在6.004这门课中介绍过（时间不足我就暂时不学了）。 xv6存储库中有一个文件<code>user/call.c</code>。 <code>make fs.img</code>对其进行编译，并在<code>user/call.asm</code>中生成该程序的可读汇编版本。</p>
+<p>阅读 <code>call.asm</code>，以及 RISC-V 指令集教程，回答问题。（学习 RISC-V 汇编）</p>
+<blockquote>
+<p>Q: Which registers contain arguments to functions? For example, which register holds 13 in main’s call to printf?<br>A: a0-a7; a2; </p>
+<p>Q: Where is the call to function f in the assembly code for main? Where is the call to g? (Hint: the compiler may inline functions.)<br>A: There is none. g(x) is inlined within f(x) and f(x) is further inlined into main() </p>
+<p>Q: At what address is the function printf located?<br>A: 0x0000000000000628, main calls it with pc-relative addressing. </p>
+<p>Q: What value is in the register ra just after the jalr to printf in main?<br>A: 0x0000000000000038, next line of assembly right after the jalr </p>
+<p>Q: Run the following code.     </p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">unsigned</span> <span class="type">int</span> i = <span class="number">0x00646c72</span>; </span><br><span class="line"><span class="built_in">printf</span>(<span class="string">&quot;H%x Wo%s&quot;</span>, <span class="number">57616</span>, &amp;i);</span><br></pre></td></tr></table></figure>
+
+<p>What is the output?<br>If the RISC-V were instead big-endian what would you set i to in order to yield the same output? Would you need to change 57616 to a different value?<br>A: “He110 World”; 0x726c6400; no, 57616 is 110 in hex regardless of endianness. </p>
+<p>Q: In the following code, what is going to be printed after ‘y&#x3D;’? (note: the answer is not a specific value.) Why does this happen?     printf(“x&#x3D;%d y&#x3D;%d”, 3);<br>A: A random value depending on what codes there are right before the call.Because printf tried to read more arguments than supplied. The second argument <code>3</code> is passed in a1, and the register for the third argument, a2, is not set to any specific value before the call, and contains whatever there is before the call. </p>
+</blockquote>
+<p>简单翻译：</p>
+<blockquote>
+<p>Q: 哪些寄存器存储了函数调用的参数？举个例子，main 调用 printf 的时候，13 被存在了哪个寄存器中？ </p>
+<p>A: a0-a7; a2; </p>
+<p>Q: main 中调用函数 f 对应的汇编代码在哪？对 g 的调用呢？ (提示：编译器有可能会内链(inline)一些函数) </p>
+<p>A: 没有这样的代码。 g(x) 被内链到 f(x) 中，然后 f(x) 又被进一步内链到 main() 中 </p>
+<p>Q: printf 函数所在的地址是？ </p>
+<p>A: 0x0000000000000628, main 中使用 pc 相对寻址来计算得到这个地址。 </p>
+<p>Q: 在 main 中 jalr 跳转到 printf 之后，ra 的值是什么？ </p>
+<p>A: 0x0000000000000038, jalr 指令的下一条汇编指令的地址。 </p>
+<p>Q: 运行下面的代码     unsigned int i &#x3D; 0x00646c72; printf(“H%x Wo%s”, 57616, &amp;i);       输出是什么？ 如果 RISC-V 是大端序的，要实现同样的效果，需要将 i 设置为什么？需要将 57616 修改为别的值吗？ </p>
+<p>A: “He110 World”; 0x726c6400; 不需要，57616 的十六进制是 110，无论端序（十六进制和内存中的表示不是同个概念） </p>
+<p>Q: 在下面的代码中，’y&#x3D;’ 之后会答应什么？ (note: 答案不是一个具体的值) 为什么?     printf(“x&#x3D;%d y&#x3D;%d”, 3); </p>
+<p>A: 输出的是一个受调用前的代码影响的“随机”的值。因为 printf 尝试读的参数数量比提供的参数数量多。 第二个参数 <code>3</code> 通过 a1 传递，而第三个参数对应的寄存器 a2 在调用前不会被设置为任何具体的值，而是会 包含调用发生前的任何已经在里面的值。 </p>
+</blockquote>
+<h3 id="Backtrace"><a href="#Backtrace" class="headerlink" title="Backtrace"></a>Backtrace</h3><p>实现backtrace，递归打印函数调用栈。使用r_fp获取当前栈帧地址，由于栈是由高地址向低地址增长的，因此使用PGROUNDUP获得栈底地址，之后循环打印栈帧的函数的返回地址。</p>
+<p>在<code> defs.h</code> 中添加声明</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">// printf.c</span></span><br><span class="line"><span class="type">void</span>            <span class="title function_">printf</span><span class="params">(<span class="type">char</span>*, ...)</span>;</span><br><span class="line"><span class="type">void</span>            <span class="title function_">panic</span><span class="params">(<span class="type">char</span>*)</span> __<span class="title function_">attribute__</span><span class="params">((<span class="keyword">noreturn</span>))</span>;</span><br><span class="line"><span class="type">void</span>            <span class="title function_">printfinit</span><span class="params">(<span class="type">void</span>)</span>;</span><br><span class="line"><span class="type">void</span>            <span class="title function_">backtrace</span><span class="params">(<span class="type">void</span>)</span>; <span class="comment">// new</span></span><br></pre></td></tr></table></figure>
+
+<p>在xv6内核中的PAGE对齐地址处为每个堆栈分配一页。 可以使用PGROUNDDOWN（fp）和PGROUNDUP（fp）来计算堆栈页面的顶部和底部地址。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">backtrace</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">   uint64 fp=r_fp();</span><br><span class="line">   uint64 high=PGROUNDUP(fp),low=PGROUNDDOWN(fp);</span><br><span class="line">   <span class="built_in">printf</span>(<span class="string">&quot;backtrace:\n&quot;</span>);</span><br><span class="line">   <span class="keyword">while</span>(fp&gt;=low &amp;&amp; fp&lt;high)</span><br><span class="line">   &#123;	</span><br><span class="line">      <span class="built_in">printf</span>(<span class="string">&quot;%p\n&quot;</span>,*((uint64*)(fp<span class="number">-8</span>)));</span><br><span class="line">      fp=*((uint64*)(fp<span class="number">-16</span>));</span><br><span class="line">   &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h3 id="Alarm"><a href="#Alarm" class="headerlink" title="Alarm"></a>Alarm</h3><p>这一个要求添加系统调用<code>sigalarm</code>来实现当用户程序运行了n个ticks后，触发一次回调函数。由之前的学习可以知道，时钟中断的处理是在<code>usertrap</code>函数中的<code>if(which_dev == 2)</code>里面的。</p>
+<p>为了实现这个功能，首先在<code>proc</code>结构体中添加相应字段：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">proc</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  <span class="comment">// these are used for sys_alarm</span></span><br><span class="line">  <span class="type">int</span> duration;                <span class="comment">// ticks after last alarm</span></span><br><span class="line">  <span class="type">int</span> alarm;                   <span class="comment">// alarm every n ticks</span></span><br><span class="line">  uint64 handler;              <span class="comment">// handler for alarm</span></span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">trapframe</span> *<span class="title">alarm_trapframe</span>;</span> <span class="comment">// register saved for alarm</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>之后实现<code>sys_alarm</code>函数，将相关信息填入<code>proc</code>中：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sigalarm</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> ticks;</span><br><span class="line">  uint64 handler;</span><br><span class="line">  <span class="keyword">if</span>(argint(<span class="number">0</span>, &amp;ticks) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  <span class="keyword">if</span>(argaddr(<span class="number">1</span>, &amp;handler) &lt; <span class="number">0</span>)</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  </span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  p-&gt;alarm = ticks;</span><br><span class="line">  p-&gt;handler = handler;</span><br><span class="line">  p-&gt;duration = <span class="number">0</span>;</span><br><span class="line">  p-&gt;alarm_trapframe = <span class="number">0</span>;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>而最关键的部分是在<code>usertrap</code>中，当发生时钟中断时，将<code>p-&gt;duration</code>增加，如果<code>p-&gt;duration == p-&gt;alarm</code>，那么就要触发一次回调函数，而触发的方法就是将<code>p-&gt;trapframe-&gt;epc</code>设置为回调函数地址，当陷阱处理程序结束后就会跳转到回调函数。</p>
+<p>而为了保证回调函数不会破坏原程序的寄存器，需要对<code>trapframe</code>进行保存；我这里选择的方法是通过<code>kalloc</code>申请一个新的<code>trapframe</code>结构体，然后将<code>trapframe</code>复制一份。</p>
+<p>为了保证回调函数执行期间不会重复调用，就可以判断<code>p-&gt;alarm_trapframe</code>是否为0，不为0说明上一次的回调函数还没有调用<code>sigreturn</code>，即函数未结束。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">if</span>(which_dev == <span class="number">2</span>)&#123;</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;alarm != <span class="number">0</span>)&#123;</span><br><span class="line">    p-&gt;duration++;</span><br><span class="line">    <span class="keyword">if</span>(p-&gt;duration == p-&gt;alarm)&#123;</span><br><span class="line">      p-&gt;duration = <span class="number">0</span>;</span><br><span class="line">      <span class="keyword">if</span>(p-&gt;alarm_trapframe == <span class="number">0</span>)&#123;</span><br><span class="line">        p-&gt;alarm_trapframe = kalloc();</span><br><span class="line">        memmove(p-&gt;alarm_trapframe, p-&gt;trapframe, <span class="number">512</span>);</span><br><span class="line">        p-&gt;trapframe-&gt;epc = p-&gt;handler;</span><br><span class="line">      &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">        yield();</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">      yield();</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;<span class="keyword">else</span>&#123;</span><br><span class="line">    yield();</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后就是<code>sigreturn</code>函数，这个函数要做的工作就是将之前保存的<code>alarm_trapframe</code>还原到<code>trapframe</code>中，并将<code>alarm_trapframe</code>释放掉。别忘了在<code>freeproc</code>函数中也要对<code>p-&gt;alarm_trapframe</code>进行判断，防止程序异常结束时该页面没有被释放。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_sigreturn</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">proc</span>* <span class="title">p</span> =</span> myproc();</span><br><span class="line">  <span class="keyword">if</span>(p-&gt;alarm_trapframe != <span class="number">0</span>)&#123;</span><br><span class="line">    memmove(p-&gt;trapframe, p-&gt;alarm_trapframe, <span class="number">512</span>);</span><br><span class="line">    kfree(p-&gt;alarm_trapframe);</span><br><span class="line">    p-&gt;alarm_trapframe = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/05/26/xv6-lab4/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-xv6-lab3" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
