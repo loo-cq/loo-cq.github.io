@@ -6,18 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>文章分类 | locq‘s blog</title>
+  <title>MIT6.S081 — Lab11 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="猫的纸箱">
-<meta property="og:type" content="website">
-<meta property="og:title" content="文章分类">
-<meta property="og:url" content="http://locq.scnu.work/categories/index.html">
+  <meta name="description" content="Lab net: Network stack首先是e1000_transmit函数，按照hints一步步来就行了，唯一一个要查文档的就是cmd域，但其实这个域的宏定义里面就只给了E1000_TXD_CMD_R和E1000_TXD_CMD_EOP这两个，也就是说我们只要关注这两个就行了： 123456789101112131415161718192021222324252627inte1000_tr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT6.S081 — Lab11">
+<meta property="og:url" content="http://locq.scnu.work/2022/07/02/xv6-lab11/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="猫的纸箱">
+<meta property="og:description" content="Lab net: Network stack首先是e1000_transmit函数，按照hints一步步来就行了，唯一一个要查文档的就是cmd域，但其实这个域的宏定义里面就只给了E1000_TXD_CMD_R和E1000_TXD_CMD_EOP这两个，也就是说我们只要关注这两个就行了： 123456789101112131415161718192021222324252627inte1000_tr">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2022-03-09T18:40:02.000Z">
-<meta property="article:modified_time" content="2022-03-22T16:58:44.574Z">
+<meta property="article:published_time" content="2022-07-02T06:40:35.000Z">
+<meta property="article:modified_time" content="2022-07-04T07:14:05.223Z">
 <meta property="article:author" content="locq">
+<meta property="article:tag" content="记录">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
@@ -148,20 +149,183 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article class="article article-type-post show">
-  <header class="article-header" style="border-bottom: 1px solid #ccc">
-  <h1 class="article-title" itemprop="name">
-    文章分类
-  </h1>
-  </header>
+            <article id="post-xv6-lab11" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MIT6.S081 — Lab11
+    </h1>
+  
+
+        
+        <a href="/2022/07/02/xv6-lab11/" class="archive-article-date">
+  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Lab-net-Network-stack"><a href="#Lab-net-Network-stack" class="headerlink" title="Lab net: Network stack"></a>Lab net: Network stack</h1><p>首先是<code>e1000_transmit</code>函数，按照hints一步步来就行了，唯一一个要查文档的就是<code>cmd</code>域，但其实这个域的宏定义里面就只给了<code>E1000_TXD_CMD_R</code>和<code>E1000_TXD_CMD_EOP</code>这两个，也就是说我们只要关注这两个就行了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">e1000_transmit</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">  uint32 idx = regs[E1000_TDT];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tx_desc</span>* <span class="title">desc</span> =</span> &amp;tx_ring[idx];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((desc-&gt;status &amp; E1000_TXD_STAT_DD) == <span class="number">0</span>)&#123;</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;buffer overflow\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(tx_mbufs[idx])</span><br><span class="line">    mbuffree(tx_mbufs[idx]);</span><br><span class="line">  </span><br><span class="line">  desc-&gt;addr = (uint64)m-&gt;head;</span><br><span class="line">  desc-&gt;length = m-&gt;len;</span><br><span class="line">  desc-&gt;cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;</span><br><span class="line">  tx_mbufs[idx] = m;</span><br><span class="line"></span><br><span class="line">  regs[E1000_TDT] = (idx + <span class="number">1</span>) % TX_RING_SIZE;</span><br><span class="line">  __sync_synchronize();</span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后是<code>e1000_recv</code>函数，这里注意一次中断应该把所有到达的数据都处理掉，剩下的按hints里面的来就行了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">e1000_recv</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> idx = (regs[E1000_RDT] + <span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">rx_desc</span>* <span class="title">desc</span> =</span> &amp;rx_ring[idx];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(desc-&gt;status &amp; E1000_RXD_STAT_DD)&#123;</span><br><span class="line">    acquire(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span> *<span class="title">buf</span> =</span> rx_mbufs[idx];</span><br><span class="line">    mbufput(buf, desc-&gt;length);</span><br><span class="line">    </span><br><span class="line">    rx_mbufs[idx] = mbufalloc(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (!rx_mbufs[idx])</span><br><span class="line">      panic(<span class="string">&quot;mbuf alloc failed&quot;</span>);</span><br><span class="line">    desc-&gt;addr = (uint64) rx_mbufs[idx]-&gt;head;</span><br><span class="line">    desc-&gt;status = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    regs[E1000_RDT] = idx;</span><br><span class="line">    __sync_synchronize();</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">    net_rx(buf);</span><br><span class="line">    </span><br><span class="line">    idx = (regs[E1000_RDT] + <span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">    desc = &amp;rx_ring[idx];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2022/07/02/xv6-lab11/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
 
   
-  <div class="category-all-page">
-    <h2>共计&nbsp;7&nbsp;个分类</h2>
-    <ul class="category-list-item-list"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><span class="category-list-item-list-count">7</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/MIT-OperatingSystemEngineering/">MIT-OperatingSystemEngineering</a><span class="category-list-item-list-count">7</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/MIT-OperatingSystemEngineering/Lab/">Lab</a><span class="category-list-item-list-count">7</span></li></ul></li></ul></li><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/">疑难杂症</a><span class="category-list-item-list-count">1</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/openEUler/">openEUler</a><span class="category-list-item-list-count">1</span></li></ul></li><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-item-list-count">3</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E5%B7%A5%E5%85%B7/">网络工具</a><span class="category-list-item-list-count">3</span></li></ul></li></ul>
-  </div>
+<nav id="article-nav">
   
-</article>
+  
+    <a href="/2022/07/02/xv6-lab9/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MIT6.S081 — Lab9</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Lab-net-Network-stack"><span class="toc-number">1.</span> <span class="toc-text">Lab net: Network stack</span></a></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>
@@ -184,7 +348,7 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,

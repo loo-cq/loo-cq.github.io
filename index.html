@@ -148,6 +148,224 @@
           <div id="js-content" class="content-ll">
             
   
+    <article id="post-xv6-lab11" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/07/02/xv6-lab11/">MIT6.S081 — Lab11</a>
+    </h1>
+  
+
+        
+        <a href="/2022/07/02/xv6-lab11/" class="archive-article-date">
+  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Lab-net-Network-stack"><a href="#Lab-net-Network-stack" class="headerlink" title="Lab net: Network stack"></a>Lab net: Network stack</h1><p>首先是<code>e1000_transmit</code>函数，按照hints一步步来就行了，唯一一个要查文档的就是<code>cmd</code>域，但其实这个域的宏定义里面就只给了<code>E1000_TXD_CMD_R</code>和<code>E1000_TXD_CMD_EOP</code>这两个，也就是说我们只要关注这两个就行了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span></span><br><span class="line"><span class="title function_">e1000_transmit</span><span class="params">(<span class="keyword">struct</span> mbuf *m)</span></span><br><span class="line">&#123;</span><br><span class="line">  acquire(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">  uint32 idx = regs[E1000_TDT];</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">tx_desc</span>* <span class="title">desc</span> =</span> &amp;tx_ring[idx];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((desc-&gt;status &amp; E1000_TXD_STAT_DD) == <span class="number">0</span>)&#123;</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line">    <span class="built_in">printf</span>(<span class="string">&quot;buffer overflow\n&quot;</span>);</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(tx_mbufs[idx])</span><br><span class="line">    mbuffree(tx_mbufs[idx]);</span><br><span class="line">  </span><br><span class="line">  desc-&gt;addr = (uint64)m-&gt;head;</span><br><span class="line">  desc-&gt;length = m-&gt;len;</span><br><span class="line">  desc-&gt;cmd = E1000_TXD_CMD_RS | E1000_TXD_CMD_EOP;</span><br><span class="line">  tx_mbufs[idx] = m;</span><br><span class="line"></span><br><span class="line">  regs[E1000_TDT] = (idx + <span class="number">1</span>) % TX_RING_SIZE;</span><br><span class="line">  __sync_synchronize();</span><br><span class="line">  release(&amp;e1000_lock);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>然后是<code>e1000_recv</code>函数，这里注意一次中断应该把所有到达的数据都处理掉，剩下的按hints里面的来就行了：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> <span class="type">void</span></span><br><span class="line"><span class="title function_">e1000_recv</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">int</span> idx = (regs[E1000_RDT] + <span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">rx_desc</span>* <span class="title">desc</span> =</span> &amp;rx_ring[idx];</span><br><span class="line"></span><br><span class="line">  <span class="keyword">while</span>(desc-&gt;status &amp; E1000_RXD_STAT_DD)&#123;</span><br><span class="line">    acquire(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">mbuf</span> *<span class="title">buf</span> =</span> rx_mbufs[idx];</span><br><span class="line">    mbufput(buf, desc-&gt;length);</span><br><span class="line">    </span><br><span class="line">    rx_mbufs[idx] = mbufalloc(<span class="number">0</span>);</span><br><span class="line">    <span class="keyword">if</span> (!rx_mbufs[idx])</span><br><span class="line">      panic(<span class="string">&quot;mbuf alloc failed&quot;</span>);</span><br><span class="line">    desc-&gt;addr = (uint64) rx_mbufs[idx]-&gt;head;</span><br><span class="line">    desc-&gt;status = <span class="number">0</span>;</span><br><span class="line"></span><br><span class="line">    regs[E1000_RDT] = idx;</span><br><span class="line">    __sync_synchronize();</span><br><span class="line">    release(&amp;e1000_lock);</span><br><span class="line"></span><br><span class="line">    net_rx(buf);</span><br><span class="line">    </span><br><span class="line">    idx = (regs[E1000_RDT] + <span class="number">1</span>) % RX_RING_SIZE;</span><br><span class="line">    desc = &amp;rx_ring[idx];</span><br><span class="line">  &#125;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/07/02/xv6-lab11/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
+    <article id="post-xv6-lab9" class="article article-type-post  article-index" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2022/07/02/xv6-lab9/">MIT6.S081 — Lab9</a>
+    </h1>
+  
+
+        
+        <a href="/2022/07/02/xv6-lab9/" class="archive-article-date">
+  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Lab-file-system"><a href="#Lab-file-system" class="headerlink" title="Lab: file system"></a>Lab: file system</h1><p>这次实验是要对文件系统修改，使其支持更大的文件以及符号链接，实验本身并不是很复杂。但文件系统可以说是XV6中最复杂的部分，整个文件系统包括了七层：文件描述符，路径名，目录，inode，日志，缓冲区，磁盘。</p>
+<!--文件描述符类似于Linux，将文件、管道、设备、套接字等都抽象为文件描述符，从而可以使用`read`和`write`系统调用对其进行读写。XV6的`read`和`write`是使用if-else来对描述符类型进行判断，选择对应的底层函数；而在Linux中，则是使用函数指针直接指向对应的底层函数，避免进行多次判断。-->
+
+<!--路径名则提供了根据路径名从目录系统中查找文件的功能。在路径查找过程中需要避免可能会出现的死锁，例如路径名中包含`..`-->。
+
+<!--目录层类似于文件，目录文件的内部会保存该目录的目录项`struct dirent`，其中包含了文件名和对应的inode号。在XV中目录查找是使用遍历目录项数组来依次比较，时间复杂度为O(n)；而在NTFS、ZFS等文件系统中，会使用磁盘平衡树来组织目录项，使目录查找的复杂度降低为O(lgn)。-->
+
+<!--inode层为文件在磁盘上的组织，在磁盘中会有一块区域用于保存`inode`信息，包括文件类型、大小、链接数以及文件每个块对应的磁盘块号。通过路径从目录系统中查找到对应的`inode`号，之后就可以从磁盘上读取对应的`inode`信息，之后就可以根据偏移量查找对应的磁盘块号，最后对其进行读写。-->
+
+<!--日志层提供了事务以及故障恢复的功能，当有多个磁盘操作必须原子完成时就要用到事务（如删除文件时要从目录中删除文件，删除文件对应的inode，对空闲块bitmap进行修改等）。日志先将操作写到磁盘的日志区上，写入完成后再写入`commit`，最后再将所有操作真正写到磁盘上去。当在写入`commit`之前发生故障，就不需要进行操作，因为事务没有被提交；当在写入`commit`之后发生故障，就将日志区的日志全部重写一遍，保证事务被正确提交。-->
+
+<!--缓冲区则提供了磁盘块缓存，同时保证一个磁盘块在缓冲区中只有一个，使得同一时间只能有一个线程对同一个块进行操作，避免读到的数据不一致。-->
+
+<h2 id="Large-files-moderate"><a href="#Large-files-moderate" class="headerlink" title="Large files (moderate)"></a>Large files (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/labs/guidance.html">moderate</a>)</h2><p>这一个实验是要使XV6支持更大的文件。原始XV6中的文件块号<code>dinode.addr</code>是使用一个大小为12的直接块表以及一个大小为256的一级块表，即文件最大为<code>12+256</code>块。可以通过将一个直接块表中的项替换为一个二级块表来使系统支持大小为<code>11+256+256*256</code>个块的文件。</p>
+<p>首先修改对应的宏以及<code>inode</code>定义。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NINDIRECT * NINDIRECT)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>之后修改<code>bmap</code>函数，使其支持二级块表，其实就是重复一次块表的查询过程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT * NINDIRECT)&#123;</span><br><span class="line">    <span class="comment">// double indirect</span></span><br><span class="line">    <span class="type">int</span> idx = bn / NINDIRECT;</span><br><span class="line">    <span class="type">int</span> off = bn % NINDIRECT;</span><br><span class="line">    <span class="keyword">if</span>((addr = ip-&gt;addrs[NDIRECT + <span class="number">1</span>]) == <span class="number">0</span>)</span><br><span class="line">      ip-&gt;addrs[NDIRECT + <span class="number">1</span>] = addr = balloc(ip-&gt;dev);</span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span>((addr = a[idx]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[idx] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span>((addr = a[off]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[off] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  panic(<span class="string">&quot;bmap: out of range&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后修改<code>itrunc</code>函数使其能够释放二级块表对应的块，主要就是注意一下<code>brelse</code>的调用就行了，仿照一级块表的处理就行了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itrunc</span><span class="params">(<span class="keyword">struct</span> inode *ip)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;addrs[NDIRECT + <span class="number">1</span>])&#123;</span><br><span class="line">    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT + <span class="number">1</span>]);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">bpd</span>;</span></span><br><span class="line">    uint* b;</span><br><span class="line">    <span class="keyword">for</span>(j = <span class="number">0</span>; j &lt; NINDIRECT; j++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(a[j])&#123;</span><br><span class="line">        bpd = bread(ip-&gt;dev, a[j]);</span><br><span class="line">        b = (uint*)bpd-&gt;data;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> k = <span class="number">0</span>; k &lt; NINDIRECT; k++)&#123;</span><br><span class="line">          <span class="keyword">if</span>(b[k])</span><br><span class="line">            bfree(ip-&gt;dev, b[k]);</span><br><span class="line">        &#125;</span><br><span class="line">        brelse(bpd);</span><br><span class="line">        bfree(ip-&gt;dev, a[j]);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT + <span class="number">1</span>]);</span><br><span class="line">    ip-&gt;addrs[NDIRECT + <span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ip-&gt;size = <span class="number">0</span>;</span><br><span class="line">  iupdate(ip);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Symbolic-links-moderate"><a href="#Symbolic-links-moderate" class="headerlink" title="Symbolic links (moderate)"></a>Symbolic links (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/labs/guidance.html">moderate</a>)</h2><p>这一个实验是要实现符号链接，符号链接就是在文件中保存指向文件的路径名，在打开文件的时候根据保存的路径名再去查找实际文件。与符号链接相反的就是硬链接，硬链接是将文件的<code>inode</code>号指向目标文件的<code>inode</code>，并将引用计数加一。</p>
+<p><code>symlink</code>的系统调用实现起来也很简单，就是创建一个<code>inode</code>，设置类型为<code>T_SYMLINK</code>，然后向这个<code>inode</code>中写入目标文件的路径就行了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_symlink</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> target[MAXPATH];</span><br><span class="line">  <span class="built_in">memset</span>(target, <span class="number">0</span>, <span class="keyword">sizeof</span>(target));</span><br><span class="line">  <span class="type">char</span> path[MAXPATH];</span><br><span class="line">  <span class="keyword">if</span>(argstr(<span class="number">0</span>, target, MAXPATH) &lt; <span class="number">0</span> || argstr(<span class="number">1</span>, path, MAXPATH) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span> *<span class="title">ip</span>;</span></span><br><span class="line"></span><br><span class="line">  begin_op();</span><br><span class="line">  <span class="keyword">if</span>((ip = create(path, T_SYMLINK, <span class="number">0</span>, <span class="number">0</span>)) == <span class="number">0</span>)&#123;</span><br><span class="line">    end_op();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(writei(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH) != MAXPATH)&#123;</span><br><span class="line">    <span class="comment">// panic(&quot;symlink write failed&quot;);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  iunlockput(ip);</span><br><span class="line">  end_op();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后在<code>sys_open</code>中添加对符号链接的处理就行了，当模式不是<code>O_NOFOLLOW</code>的时候就对符号链接进行循环处理，直到找到真正的文件，如果循环超过了一定的次数（10），就说明可能发生了循环链接，就返回-1。这里主要就是要注意<code>namei</code>函数不会对<code>ip</code>上锁，需要使用<code>ilock</code>来上锁，而<code>create</code>则会上锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_open</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_DEVICE &amp;&amp; (ip-&gt;major &lt; <span class="number">0</span> || ip-&gt;major &gt;= NDEV))&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_SYMLINK)&#123;</span><br><span class="line">    <span class="keyword">if</span>(!(omode &amp; O_NOFOLLOW))&#123;</span><br><span class="line">      <span class="type">int</span> cycle = <span class="number">0</span>;</span><br><span class="line">      <span class="type">char</span> target[MAXPATH];</span><br><span class="line">      <span class="keyword">while</span>(ip-&gt;type == T_SYMLINK)&#123;</span><br><span class="line">        <span class="keyword">if</span>(cycle == <span class="number">10</span>)&#123;</span><br><span class="line">          iunlockput(ip);</span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// max cycle</span></span><br><span class="line">        &#125;</span><br><span class="line">        cycle++;</span><br><span class="line">        <span class="built_in">memset</span>(target, <span class="number">0</span>, <span class="keyword">sizeof</span>(target));</span><br><span class="line">        readi(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH);</span><br><span class="line">        iunlockput(ip);</span><br><span class="line">        <span class="keyword">if</span>((ip = namei(target)) == <span class="number">0</span>)&#123;</span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// target not exist</span></span><br><span class="line">        &#125;</span><br><span class="line">        ilock(ip);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((f = filealloc()) == <span class="number">0</span> || (fd = fdalloc(f)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+        <p class="article-more-link">
+          <a class="article-more-a" href="/2022/07/02/xv6-lab9/">展开全文 >></a>
+        </p>
+      
+
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+    </div>
+</aside>
+
+
+
+
+  
     <article id="post-xv6-lab4" class="article article-type-post  article-index" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1317,129 +1535,10 @@
 
 
   
-    <article id="post-ZeroTier-moon" class="article article-type-post  article-index" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <header class="article-header">
-        
   
-    <h1 itemprop="name">
-      <a class="article-title" href="/2021/03/05/ZeroTier-moon/">ZeroTier配置moon节点</a>
-    </h1>
-  
-
-        
-        <a href="/2021/03/05/ZeroTier-moon/" class="archive-article-date">
-  	<time datetime="2021-03-05T07:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2021-03-05</time>
-</a>
-        
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h1 id="服务端配置"><a href="#服务端配置" class="headerlink" title="服务端配置"></a>服务端配置</h1><h2 id="1-安装ZeroTier并加入网络"><a href="#1-安装ZeroTier并加入网络" class="headerlink" title="1.安装ZeroTier并加入网络"></a>1.安装ZeroTier并加入网络</h2><p>moon也是要在你自己的网络里面，也就是说是你网络的moon。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">curl-s https://install.zerotier.com/ | sudo bash</span><br></pre></td></tr></table></figure>
-
-<p>加入网络。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli join [Your Network-ID]</span><br></pre></td></tr></table></figure>
-
-<h2 id="2-给文件夹授权以及生成moon配置文件"><a href="#2-给文件夹授权以及生成moon配置文件" class="headerlink" title="2.给文件夹授权以及生成moon配置文件"></a>2.给文件夹授权以及生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">sudo chmod 777 /var/lib/zerotier-one</span><br><span class="line">cd /var/lib/zerotier-one</span><br><span class="line">sudo zerotier-idtool initmoon identity.public &gt; moon.json </span><br></pre></td></tr></table></figure>
-
-<h2 id="3-修改moon的配置文件"><a href="#3-修改moon的配置文件" class="headerlink" title="3.修改moon的配置文件"></a>3.修改moon的配置文件</h2><p>配置文件路径：</p>
-<p><code>/var/lib/zerotier-one/moon.json</code></p>
-<p>主要是添加机器的公网ip，格式如下：</p>
-<p><code>Sample：&quot;stableEndpoints&quot;:[ &quot;ipv4address/9993&quot;,&quot;ipv6address/9993&quot; ]</code></p>
-<h2 id="4-生成moon配置文件"><a href="#4-生成moon配置文件" class="headerlink" title="4.生成moon配置文件"></a>4.生成moon配置文件</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo zerotier-idtool genmoon moon.json</span><br></pre></td></tr></table></figure>
-
-<p>然后就会生成一个 000000xxxxxx.moon的文件在<code>/var/lib/zerotier-one/</code>下。</p>
-<p>在&#x2F;var&#x2F;lib&#x2F;zerotier-one目录下,手动新建一个 moons.d 文件夹，并将刚生成的moon配置文件放到该文件夹下。</p>
-<p><code>mv 000000xxxxxx.moon moons.d/</code></p>
-<h2 id="5-重启服务"><a href="#5-重启服务" class="headerlink" title="5.重启服务"></a>5.重启服务</h2><figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">service zerotier-one restart </span><br><span class="line">/etc/init.d/zerotier-one restart</span><br><span class="line">service zerotier-one start </span><br><span class="line">zerotier-one -d </span><br><span class="line"><span class="meta">#</span><span class="language-bash">随便选一个，根据系统版本不同有些会无效</span></span><br></pre></td></tr></table></figure>
-
-<p>重启完成后服务端就搭建完成了。</p>
-<h1 id="客户端配置"><a href="#客户端配置" class="headerlink" title="客户端配置"></a>客户端配置</h1><h2 id="1-添加配置文件"><a href="#1-添加配置文件" class="headerlink" title="1.添加配置文件"></a>1.添加配置文件</h2><p>发现一个新的命令，可以直接在客户端配置。</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli orbit xxxxxx xxxxxx //xxxxxx对应的是上文000000xxxxxx.moon中的xxxxxx。</span><br></pre></td></tr></table></figure>
-
-<p>有了这个下面的都是废话啦。</p>
-<h3 id="Linux："><a href="#Linux：" class="headerlink" title="Linux："></a>Linux：</h3><p>直接在zerotier目录下,创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>通常路径是：<code>/var/lib/zerotier-one/</code></p>
-<h3 id="Windows"><a href="#Windows" class="headerlink" title="Windows"></a>Windows</h3><p>也是在zerotier目录下创建moons.d文件夹,并且将生成的000000xxxxxx.moon文件拷入,并重启服务即可。</p>
-<p>一般路径：<code>C:\ProgramData\ZeroTier\One\</code></p>
-<h3 id="Mac-OS"><a href="#Mac-OS" class="headerlink" title="Mac OS"></a>Mac OS</h3><p>同理，参考路径：<code>/Library/Application Support/ZeroTier/One</code></p>
-<p>记得重启服务</p>
-<h2 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h2><p>输入下面命令：</p>
-<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">zerotier-cli listpeers</span><br></pre></td></tr></table></figure>
-
-<p>若有出现你的服务器IP地址,且后面标注是moon，即可证明moon连接成功</p>
-<h1 id="疑惑"><a href="#疑惑" class="headerlink" title="疑惑"></a>疑惑</h1><p>众所周知，ZeroTier走的是UDP，众众所周知，咱GFW对UDP特别敏感，流量一大就盖，不知道能稳定用多久哈哈哈。不过也只有我这种服务器要过墙的穷人才要考虑的问题了。</p>
-
-      
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">教程</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-      
-        <p class="article-more-link">
-          <a class="article-more-a" href="/2021/03/05/ZeroTier-moon/">展开全文 >></a>
-        </p>
-      
-
-      
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-<aside class="wrap-side-operation">
-    <div class="mod-side-operation">
-        
-        <div class="jump-container" id="js-jump-container" style="display:none;">
-            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
-                <i class="icon-font icon-back"></i>
-            </a>
-            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
-                <i class="icon-font icon-plane jump-plane"></i>
-            </div>
-        </div>
-        
-        
-    </div>
-</aside>
-
-
-
-
-  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &amp;raquo;</a>
+    </nav>
   
 
 

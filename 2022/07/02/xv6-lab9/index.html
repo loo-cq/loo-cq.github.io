@@ -6,18 +6,19 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>文章分类 | locq‘s blog</title>
+  <title>MIT6.S081 — Lab9 | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="猫的纸箱">
-<meta property="og:type" content="website">
-<meta property="og:title" content="文章分类">
-<meta property="og:url" content="http://locq.scnu.work/categories/index.html">
+  <meta name="description" content="Lab: file system这次实验是要对文件系统修改，使其支持更大的文件以及符号链接，实验本身并不是很复杂。但文件系统可以说是XV6中最复杂的部分，整个文件系统包括了七层：文件描述符，路径名，目录，inode，日志，缓冲区，磁盘。   。          Large files (moderate)这一个实验是要使XV6支持更大的文件。原始XV6中的文件块号dinode.addr是使用一个">
+<meta property="og:type" content="article">
+<meta property="og:title" content="MIT6.S081 — Lab9">
+<meta property="og:url" content="http://locq.scnu.work/2022/07/02/xv6-lab9/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="猫的纸箱">
+<meta property="og:description" content="Lab: file system这次实验是要对文件系统修改，使其支持更大的文件以及符号链接，实验本身并不是很复杂。但文件系统可以说是XV6中最复杂的部分，整个文件系统包括了七层：文件描述符，路径名，目录，inode，日志，缓冲区，磁盘。   。          Large files (moderate)这一个实验是要使XV6支持更大的文件。原始XV6中的文件块号dinode.addr是使用一个">
 <meta property="og:locale" content="en_US">
-<meta property="article:published_time" content="2022-03-09T18:40:02.000Z">
-<meta property="article:modified_time" content="2022-03-22T16:58:44.574Z">
+<meta property="article:published_time" content="2022-07-02T06:40:35.000Z">
+<meta property="article:modified_time" content="2022-07-04T07:14:27.733Z">
 <meta property="article:author" content="locq">
+<meta property="article:tag" content="记录">
 <meta name="twitter:card" content="summary">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
@@ -148,20 +149,214 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            <article class="article article-type-post show">
-  <header class="article-header" style="border-bottom: 1px solid #ccc">
-  <h1 class="article-title" itemprop="name">
-    文章分类
-  </h1>
-  </header>
+            <article id="post-xv6-lab9" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      MIT6.S081 — Lab9
+    </h1>
+  
+
+        
+        <a href="/2022/07/02/xv6-lab9/" class="archive-article-date">
+  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
+</a>
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Lab-file-system"><a href="#Lab-file-system" class="headerlink" title="Lab: file system"></a>Lab: file system</h1><p>这次实验是要对文件系统修改，使其支持更大的文件以及符号链接，实验本身并不是很复杂。但文件系统可以说是XV6中最复杂的部分，整个文件系统包括了七层：文件描述符，路径名，目录，inode，日志，缓冲区，磁盘。</p>
+<!--文件描述符类似于Linux，将文件、管道、设备、套接字等都抽象为文件描述符，从而可以使用`read`和`write`系统调用对其进行读写。XV6的`read`和`write`是使用if-else来对描述符类型进行判断，选择对应的底层函数；而在Linux中，则是使用函数指针直接指向对应的底层函数，避免进行多次判断。-->
+
+<!--路径名则提供了根据路径名从目录系统中查找文件的功能。在路径查找过程中需要避免可能会出现的死锁，例如路径名中包含`..`-->。
+
+<!--目录层类似于文件，目录文件的内部会保存该目录的目录项`struct dirent`，其中包含了文件名和对应的inode号。在XV中目录查找是使用遍历目录项数组来依次比较，时间复杂度为O(n)；而在NTFS、ZFS等文件系统中，会使用磁盘平衡树来组织目录项，使目录查找的复杂度降低为O(lgn)。-->
+
+<!--inode层为文件在磁盘上的组织，在磁盘中会有一块区域用于保存`inode`信息，包括文件类型、大小、链接数以及文件每个块对应的磁盘块号。通过路径从目录系统中查找到对应的`inode`号，之后就可以从磁盘上读取对应的`inode`信息，之后就可以根据偏移量查找对应的磁盘块号，最后对其进行读写。-->
+
+<!--日志层提供了事务以及故障恢复的功能，当有多个磁盘操作必须原子完成时就要用到事务（如删除文件时要从目录中删除文件，删除文件对应的inode，对空闲块bitmap进行修改等）。日志先将操作写到磁盘的日志区上，写入完成后再写入`commit`，最后再将所有操作真正写到磁盘上去。当在写入`commit`之前发生故障，就不需要进行操作，因为事务没有被提交；当在写入`commit`之后发生故障，就将日志区的日志全部重写一遍，保证事务被正确提交。-->
+
+<!--缓冲区则提供了磁盘块缓存，同时保证一个磁盘块在缓冲区中只有一个，使得同一时间只能有一个线程对同一个块进行操作，避免读到的数据不一致。-->
+
+<h2 id="Large-files-moderate"><a href="#Large-files-moderate" class="headerlink" title="Large files (moderate)"></a>Large files (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/labs/guidance.html">moderate</a>)</h2><p>这一个实验是要使XV6支持更大的文件。原始XV6中的文件块号<code>dinode.addr</code>是使用一个大小为12的直接块表以及一个大小为256的一级块表，即文件最大为<code>12+256</code>块。可以通过将一个直接块表中的项替换为一个二级块表来使系统支持大小为<code>11+256+256*256</code>个块的文件。</p>
+<p>首先修改对应的宏以及<code>inode</code>定义。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta">#<span class="keyword">define</span> NDIRECT 11</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> NINDIRECT (BSIZE / sizeof(uint))</span></span><br><span class="line"><span class="meta">#<span class="keyword">define</span> MAXFILE (NDIRECT + NINDIRECT + NINDIRECT * NINDIRECT)</span></span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">dinode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br><span class="line"></span><br><span class="line"><span class="class"><span class="keyword">struct</span> <span class="title">inode</span> &#123;</span></span><br><span class="line">  ...</span><br><span class="line">  uint addrs[NDIRECT+<span class="number">2</span>];   <span class="comment">// Data block addresses</span></span><br><span class="line">&#125;;</span><br></pre></td></tr></table></figure>
+
+<p>之后修改<code>bmap</code>函数，使其支持二级块表，其实就是重复一次块表的查询过程。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">static</span> uint</span><br><span class="line"><span class="title function_">bmap</span><span class="params">(<span class="keyword">struct</span> inode *ip, uint bn)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  bn -= NINDIRECT;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(bn &lt; NINDIRECT * NINDIRECT)&#123;</span><br><span class="line">    <span class="comment">// double indirect</span></span><br><span class="line">    <span class="type">int</span> idx = bn / NINDIRECT;</span><br><span class="line">    <span class="type">int</span> off = bn % NINDIRECT;</span><br><span class="line">    <span class="keyword">if</span>((addr = ip-&gt;addrs[NDIRECT + <span class="number">1</span>]) == <span class="number">0</span>)</span><br><span class="line">      ip-&gt;addrs[NDIRECT + <span class="number">1</span>] = addr = balloc(ip-&gt;dev);</span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span>((addr = a[idx]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[idx] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line"></span><br><span class="line">    bp = bread(ip-&gt;dev, addr);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line">    <span class="keyword">if</span>((addr = a[off]) == <span class="number">0</span>)&#123;</span><br><span class="line">      a[off] = addr = balloc(ip-&gt;dev);</span><br><span class="line">      log_write(bp);</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    <span class="keyword">return</span> addr;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  panic(<span class="string">&quot;bmap: out of range&quot;</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后修改<code>itrunc</code>函数使其能够释放二级块表对应的块，主要就是注意一下<code>brelse</code>的调用就行了，仿照一级块表的处理就行了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span></span><br><span class="line"><span class="title function_">itrunc</span><span class="params">(<span class="keyword">struct</span> inode *ip)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;addrs[NDIRECT + <span class="number">1</span>])&#123;</span><br><span class="line">    bp = bread(ip-&gt;dev, ip-&gt;addrs[NDIRECT + <span class="number">1</span>]);</span><br><span class="line">    a = (uint*)bp-&gt;data;</span><br><span class="line"></span><br><span class="line">    <span class="class"><span class="keyword">struct</span> <span class="title">buf</span> *<span class="title">bpd</span>;</span></span><br><span class="line">    uint* b;</span><br><span class="line">    <span class="keyword">for</span>(j = <span class="number">0</span>; j &lt; NINDIRECT; j++)&#123;</span><br><span class="line">      <span class="keyword">if</span>(a[j])&#123;</span><br><span class="line">        bpd = bread(ip-&gt;dev, a[j]);</span><br><span class="line">        b = (uint*)bpd-&gt;data;</span><br><span class="line">        <span class="keyword">for</span>(<span class="type">int</span> k = <span class="number">0</span>; k &lt; NINDIRECT; k++)&#123;</span><br><span class="line">          <span class="keyword">if</span>(b[k])</span><br><span class="line">            bfree(ip-&gt;dev, b[k]);</span><br><span class="line">        &#125;</span><br><span class="line">        brelse(bpd);</span><br><span class="line">        bfree(ip-&gt;dev, a[j]);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">    brelse(bp);</span><br><span class="line">    bfree(ip-&gt;dev, ip-&gt;addrs[NDIRECT + <span class="number">1</span>]);</span><br><span class="line">    ip-&gt;addrs[NDIRECT + <span class="number">1</span>] = <span class="number">0</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  ip-&gt;size = <span class="number">0</span>;</span><br><span class="line">  iupdate(ip);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="Symbolic-links-moderate"><a href="#Symbolic-links-moderate" class="headerlink" title="Symbolic links (moderate)"></a>Symbolic links (<a target="_blank" rel="noopener" href="https://pdos.csail.mit.edu/6.828/2021/labs/guidance.html">moderate</a>)</h2><p>这一个实验是要实现符号链接，符号链接就是在文件中保存指向文件的路径名，在打开文件的时候根据保存的路径名再去查找实际文件。与符号链接相反的就是硬链接，硬链接是将文件的<code>inode</code>号指向目标文件的<code>inode</code>，并将引用计数加一。</p>
+<p><code>symlink</code>的系统调用实现起来也很简单，就是创建一个<code>inode</code>，设置类型为<code>T_SYMLINK</code>，然后向这个<code>inode</code>中写入目标文件的路径就行了。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_symlink</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> target[MAXPATH];</span><br><span class="line">  <span class="built_in">memset</span>(target, <span class="number">0</span>, <span class="keyword">sizeof</span>(target));</span><br><span class="line">  <span class="type">char</span> path[MAXPATH];</span><br><span class="line">  <span class="keyword">if</span>(argstr(<span class="number">0</span>, target, MAXPATH) &lt; <span class="number">0</span> || argstr(<span class="number">1</span>, path, MAXPATH) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line">  </span><br><span class="line">  <span class="class"><span class="keyword">struct</span> <span class="title">inode</span> *<span class="title">ip</span>;</span></span><br><span class="line"></span><br><span class="line">  begin_op();</span><br><span class="line">  <span class="keyword">if</span>((ip = create(path, T_SYMLINK, <span class="number">0</span>, <span class="number">0</span>)) == <span class="number">0</span>)&#123;</span><br><span class="line">    end_op();</span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(writei(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH) != MAXPATH)&#123;</span><br><span class="line">    <span class="comment">// panic(&quot;symlink write failed&quot;);</span></span><br><span class="line">    <span class="keyword">return</span> <span class="number">-1</span>;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  iunlockput(ip);</span><br><span class="line">  end_op();</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>最后在<code>sys_open</code>中添加对符号链接的处理就行了，当模式不是<code>O_NOFOLLOW</code>的时候就对符号链接进行循环处理，直到找到真正的文件，如果循环超过了一定的次数（10），就说明可能发生了循环链接，就返回-1。这里主要就是要注意<code>namei</code>函数不会对<code>ip</code>上锁，需要使用<code>ilock</code>来上锁，而<code>create</code>则会上锁。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br></pre></td><td class="code"><pre><span class="line">uint64</span><br><span class="line"><span class="title function_">sys_open</span><span class="params">(<span class="type">void</span>)</span></span><br><span class="line">&#123;</span><br><span class="line">  ...</span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_DEVICE &amp;&amp; (ip-&gt;major &lt; <span class="number">0</span> || ip-&gt;major &gt;= NDEV))&#123;</span><br><span class="line">    ...</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>(ip-&gt;type == T_SYMLINK)&#123;</span><br><span class="line">    <span class="keyword">if</span>(!(omode &amp; O_NOFOLLOW))&#123;</span><br><span class="line">      <span class="type">int</span> cycle = <span class="number">0</span>;</span><br><span class="line">      <span class="type">char</span> target[MAXPATH];</span><br><span class="line">      <span class="keyword">while</span>(ip-&gt;type == T_SYMLINK)&#123;</span><br><span class="line">        <span class="keyword">if</span>(cycle == <span class="number">10</span>)&#123;</span><br><span class="line">          iunlockput(ip);</span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// max cycle</span></span><br><span class="line">        &#125;</span><br><span class="line">        cycle++;</span><br><span class="line">        <span class="built_in">memset</span>(target, <span class="number">0</span>, <span class="keyword">sizeof</span>(target));</span><br><span class="line">        readi(ip, <span class="number">0</span>, (uint64)target, <span class="number">0</span>, MAXPATH);</span><br><span class="line">        iunlockput(ip);</span><br><span class="line">        <span class="keyword">if</span>((ip = namei(target)) == <span class="number">0</span>)&#123;</span><br><span class="line">          end_op();</span><br><span class="line">          <span class="keyword">return</span> <span class="number">-1</span>; <span class="comment">// target not exist</span></span><br><span class="line">        &#125;</span><br><span class="line">        ilock(ip);</span><br><span class="line">      &#125;</span><br><span class="line">    &#125;</span><br><span class="line">  &#125;</span><br><span class="line"></span><br><span class="line">  <span class="keyword">if</span>((f = filealloc()) == <span class="number">0</span> || (fd = fdalloc(f)) &lt; <span class="number">0</span>)&#123;</span><br><span class="line">  ...</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+		<i class="icon-book icon"></i>
+		<ul class="article-tag-list">
+			 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
+        		</li>
+      		 
+        		<li class="article-tag-list-item">
+        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
+        		</li>
+      		
+		</ul>
+	</div>
+
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
+        </div>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2022/07/02/xv6-lab9/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
 
   
-  <div class="category-all-page">
-    <h2>共计&nbsp;7&nbsp;个分类</h2>
-    <ul class="category-list-item-list"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/">学习笔记</a><span class="category-list-item-list-count">7</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/MIT-OperatingSystemEngineering/">MIT-OperatingSystemEngineering</a><span class="category-list-item-list-count">7</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E5%AD%A6%E4%B9%A0%E7%AC%94%E8%AE%B0/MIT-OperatingSystemEngineering/Lab/">Lab</a><span class="category-list-item-list-count">7</span></li></ul></li></ul></li><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/">疑难杂症</a><span class="category-list-item-list-count">1</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%96%91%E9%9A%BE%E6%9D%82%E7%97%87/openEUler/">openEUler</a><span class="category-list-item-list-count">1</span></li></ul></li><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%BD%91%E7%BB%9C/">网络</a><span class="category-list-item-list-count">3</span><ul class="category-list-item-list-child"><li class="category-list-item-list-item"><a class="category-list-item-list-link" href="/categories/%E7%BD%91%E7%BB%9C/%E7%BD%91%E7%BB%9C%E5%B7%A5%E5%85%B7/">网络工具</a><span class="category-list-item-list-count">3</span></li></ul></li></ul>
-  </div>
+<nav id="article-nav">
   
-</article>
+    <a href="/2022/07/02/xv6-lab11/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          MIT6.S081 — Lab11
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2022/05/26/xv6-lab4/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MIT6.S081 — Lab4</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
+        </div>
+        
+        
+        <div class="toc-container tooltip-left">
+            <i class="icon-font icon-category"></i>
+            <div class="tooltip tooltip-east">
+                <span class="tooltip-item">
+                </span>
+                <span class="tooltip-content">
+                    <div class="toc-article">
+                    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#Lab-file-system"><span class="toc-number">1.</span> <span class="toc-text">Lab: file system</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#Large-files-moderate"><span class="toc-number">1.1.</span> <span class="toc-text">Large files (moderate)</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#Symbolic-links-moderate"><span class="toc-number">1.2.</span> <span class="toc-text">Symbolic links (moderate)</span></a></li></ol></li></ol>
+                    </div>
+                </span>
+            </div>
+        </div>
+        
+    </div>
+</aside>
+
+
+
+  
+  
+  
+
+  
+
+  
+
+  
 
 
           </div>
@@ -184,7 +379,7 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
 		isTag: false,
 		isCategory: false,
