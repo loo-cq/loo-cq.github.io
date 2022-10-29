@@ -6,17 +6,27 @@
   <meta name="renderer" content="webkit">
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <link rel="dns-prefetch" href="http://locq.scnu.work">
-  <title>Archives: 2022 | locq‘s blog</title>
+  <title>skiplist | locq‘s blog</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="猫的纸箱">
-<meta property="og:type" content="website">
-<meta property="og:title" content="locq‘s blog">
-<meta property="og:url" content="http://locq.scnu.work/archives/2022/index.html">
+  <meta name="description" content="快乐の周末玩乐-跳表背景 &amp;&amp; 实现起初是师兄们这周讲的一个论文用到了跳表（skiplist）这个数据结构，被老师点醒可以去学习学习，这个mini blog主要记载了玩乐的过程以及心得。 跳表简述skiplist本质上也是一种查找结构，用于解决算法中的查找问题（Searching），即根据给定的key，快速查到它所在的位置（或者对应的value） 一般用于解决查找问题的数据结构分为">
+<meta property="og:type" content="article">
+<meta property="og:title" content="skiplist">
+<meta property="og:url" content="http://locq.scnu.work/2022/10/30/skiplist/index.html">
 <meta property="og:site_name" content="locq‘s blog">
-<meta property="og:description" content="猫的纸箱">
+<meta property="og:description" content="快乐の周末玩乐-跳表背景 &amp;&amp; 实现起初是师兄们这周讲的一个论文用到了跳表（skiplist）这个数据结构，被老师点醒可以去学习学习，这个mini blog主要记载了玩乐的过程以及心得。 跳表简述skiplist本质上也是一种查找结构，用于解决算法中的查找问题（Searching），即根据给定的key，快速查到它所在的位置（或者对应的value） 一般用于解决查找问题的数据结构分为">
 <meta property="og:locale" content="en_US">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221324575.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221348478.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221407406.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221554998.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221625808.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221646349.png">
+<meta property="og:image" content="http://locq.scnu.work/2022/10/30/skiplist/%E6%88%AA%E5%B1%8F2022-10-30%20%E4%B8%8A%E5%8D%881.16.33.png">
+<meta property="article:published_time" content="2022-10-29T17:22:54.000Z">
+<meta property="article:modified_time" content="2022-10-29T17:24:49.010Z">
 <meta property="article:author" content="locq">
 <meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="http://locq.scnu.work/2022/10/30/skiplist/20200427221324575.png">
   
     <link rel="alternative" href="/atom.xml" title="locq‘s blog" type="application/atom+xml">
   
@@ -146,501 +156,196 @@
             <canvas data-colors="#eaeaea" data-sectionHeight="100" data-contentId="js-content" id="myCanvas1" class="anm-canvas"></canvas>
           </div>
           <div id="js-content" class="content-ll">
-            
+            <article id="post-skiplist" class="article article-type-post " itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <header class="article-header">
+        
   
+    <h1 class="article-title" itemprop="name">
+      skiplist
+    </h1>
   
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2022" class="archive-year">2022</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/10/30/skiplist/" class="archive-article-date">
+
+        
+        <a href="/2022/10/30/skiplist/" class="archive-article-date">
   	<time datetime="2022-10-29T17:22:54.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-10-30</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/10/30/skiplist/">skiplist</a>
-    </h1>
-  
+        
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="快乐の周末玩乐-跳表"><a href="#快乐の周末玩乐-跳表" class="headerlink" title="快乐の周末玩乐-跳表"></a>快乐の周末玩乐-跳表</h1><h2 id="背景-amp-amp-实现"><a href="#背景-amp-amp-实现" class="headerlink" title="背景 &amp;&amp; 实现"></a>背景 &amp;&amp; 实现</h2><p>起初是师兄们这周讲的一个论文用到了跳表（skiplist）这个数据结构，被老师点醒可以去学习学习，这个mini blog主要记载了玩乐的过程以及心得。</p>
+<h3 id="跳表简述"><a href="#跳表简述" class="headerlink" title="跳表简述"></a>跳表简述</h3><p>skiplist本质上也是一种查找结构，用于解决算法中的查找问题（Searching），即根据给定的key，快速查到它所在的位置（或者对应的value）</p>
+<p>一般用于解决查找问题的数据结构分为两个大类：一个是基于各种<strong>平衡树</strong>，一个是基于<strong>哈希表</strong>。但skiplist却比较特殊，它没法归属到这两大类里面</p>
+<p>这种数据结构是由<a target="_blank" rel="noopener" href="https://en.wikipedia.org/wiki/William_Pugh">William Pugh</a>发明的，最早出现于他在1990年发表的论文<a target="_blank" rel="noopener" href="https://libgen.bban.top/dl/18770477/bb4aa5">《Skip Lists: A Probabilistic Alternative to Balanced Trees》</a>对细节感兴趣的同学可以下载论文原文来阅读</p>
+<h3 id="基本数据结构"><a href="#基本数据结构" class="headerlink" title="基本数据结构"></a>基本数据结构</h3><p>skiplist本质上是一个list, 它其实是由<strong>有序链表</strong>发展而来<br>我们先来看一个有序链表，如下图（最左侧的灰色节点表示一个空的头结点）：<img src="/2022/10/30/skiplist/20200427221324575.png" alt="20200427221324575"></p>
+<p>在这样一个链表中，如果我们要查找某个数据，那么需要从头开始逐个进行比较，直到找到包含数据的那个节点，或者找到第一个比给定数据大的节点为止（没找到）。也就是说，时间复杂度为**O(n)**。同样，当我们要插入新数据的时候，也要经历同样的查找过程，从而确定插入位置</p>
+<p>假如我们每相邻两个节点增加一个指针，让指针指向下下个节点，如下图：<img src="/2022/10/30/skiplist/20200427221348478.png" alt="20200427221348478"></p>
+<p>这样所有新增加的指针连成了一个新的链表，但它包含的节点个数只有原来的一半（上图中是7, 19, 26）。现在当我们想查找数据的时候，可以先沿着这个新链表进行查找。当碰到比待查数据大的节点时，再回到原来的链表中进行查找。比如，我们想查找23，查找的路径是沿着下图中标红的指针所指向的方向进行的：</p>
+<p><img src="/2022/10/30/skiplist/20200427221407406.png" alt="20200427221407406"></p>
+<blockquote>
+<ol>
+<li>23首先和7比较，再和19比较，比它们都大，继续向后比较但23和26比较的时候，比26要小，因此回到下面的链表（原链表），与22比较</li>
+<li>23比22要大，沿下面的指针继续向后和26比较</li>
+<li>23比26小，说明待查数据23在原链表中不存在，而且它的插入位置应该在22和26之间</li>
+</ol>
+</blockquote>
+<p>在这个查找过程中，由于新增加的指针，我们不再需要与链表中每个节点逐个进行比较了。需要比较的节点数大概只有原来的一半。<br>利用同样的方式，我们可以在上层新产生的链表上，继续为每相邻的两个节点增加一个指针，从而产生第三层链表。如下图：</p>
+<p><img src="/2022/10/30/skiplist/20200427221554998.png" alt="20200427221554998"></p>
+<p>在这个新的三层链表结构上，如果我们还是查找23，那么沿着最上层链表首先要比较的是19，发现23比19大，接下来我们就知道只需要到19的后面去继续查找，从而一下子跳过了19前面的所有节点。可以想象，当链表足够长的时候，这种多层链表的查找方式能让我们跳过很多下层节点，大大加快查找的速度</p>
+<h3 id="跳表并不是单纯的多层链表"><a href="#跳表并不是单纯的多层链表" class="headerlink" title="跳表并不是单纯的多层链表"></a>跳表并不是单纯的多层链表</h3><p>skiplist正是受这种多层链表的想法的启发而设计出来的。实际上，按照上面生成链表的方式，上面每一层链表的节点个数，是下面一层的节点个数的一半，这样查找过程就非常类似于一个二分查找，使得查找的时间复杂度可以降低到**O(log n)**。聪明的同学就会说了：诶你这不就是一个二分查找？用一个平衡二叉树不久可以解决了？你甜蜜的是过来找茬的吧！</p>
+<p>但是，这种方法在插入数据的时候有很大的问题。新插入一个节点之后，就会打乱上下相邻两层链表上节点个数严格的2:1的对应关系。如果要维持这种对应关系，就必须把新插入的节点后面的所有节点（也包括新插入的节点）重新进行调整，这会让时间复杂度重新退化成O(n)。删除数据也将有有同样的问题。同时，这也是维护avl树和红黑树开销大的原因。</p>
+<p>skiplist为了避免这一问题，它不要求上下相邻两层链表之间的节点个数有严格的对应关系，而是为每个节点随机出一个层数(level)。比如，一个节点随机出的层数是3，那么就把它链入到第1层到第3层这三层链表中。为了表达清楚，下图展示了如何通过一步步的插入操作从而形成一个skiplist的过程：<img src="/2022/10/30/skiplist/20200427221625808.png" alt="20200427221625808"></p>
+<p>从上面skiplist的创建和插入过程可以看出，<strong>每一个节点的层数（level）是随机出来的</strong>，而且新插入一个节点不会影响其它节点的层数。因此，插入操作只需要修改插入节点前后的指针，而不需要对很多节点都进行调整。这就<strong>降低了插入操作的复杂度</strong>。实际上，这是skiplist的一个很重要的特性，这让它在插入性能上明显优于平衡树的方案。这在后面我们还会提到。</p>
+<p>根据上图中的skiplist结构，我们很容易理解这种数据结构的名字的由来。skiplist，翻译成中文，可以翻译成“跳表”或“跳跃表”，指的就是除了最下面第1层链表之外，它会产生若干层稀疏的链表，这些链表里面的指针故意跳过了一些节点（而且越高层的链表跳过的节点越多）。这就使得我们在查找数据的时候能够先在高层的链表中进行查找，然后逐层降低，最终降到第1层链表来精确地确定数据位置。在这个过程中，我们跳过了一些节点，从而也就加快了查找速度</p>
+<p>刚刚创建的这个skiplist总共包含4层链表，现在假设我们在它里面依然查找23，下图给出了查找路径：<img src="/2022/10/30/skiplist/20200427221646349.png" alt="20200427221646349"></p>
+<p>需要注意的是，前面演示的各个节点的插入过程，实际上在插入之前也要先经历一个类似的查找过程，在确定插入位置后，再完成插入操作</p>
+<p>至此，skiplist的查找和插入操作，我们已经很清楚了。而删除操作与插入操作类似，我们也很容易想象出来。这些操作我们也应该能很容易地用代码实现出来</p>
+<p>当然，实际应用中的skiplist每个节点应该包含key和value两部分。前面的描述中我们没有具体区分key和value，但实际上列表中是按照key进行排序的，查找过程也是根据key在比较</p>
+<h3 id="确定节点的随机层数"><a href="#确定节点的随机层数" class="headerlink" title="确定节点的随机层数"></a>确定节点的随机层数</h3><p>但是，如果你是第一次接触skiplist，那么一定会产生一个疑问：节点插入时随机出一个层数，<strong>仅仅依靠这样一个简单的随机数操作而构建出来的多层链表结构，能保证它有一个良好的查找性能吗？</strong>为了回答这个疑问，我们需要分析skiplist的统计性能</p>
+<p>在分析之前，我们还需要着重指出的是，执行插入操作时计算随机数的过程，是一个很关键的过程，它对skiplist的统计特性有着很重要的影响。这并不是一个普通的服从均匀分布的随机数，它的计算过程如下：</p>
+<ul>
+<li><p>首先，每个节点肯定都有第1层指针（每个节点都在第1层链表里）</p>
+</li>
+<li><p>如果一个节点有第i层(i&gt;&#x3D;1)指针（即节点已经在第1层到第i层链表中），那么它有第(i+1)层指针的<strong>概率为p</strong></p>
+</li>
+<li><p>节点最大的层数不允许超过一个最大值，记为<strong>MaxLevel</strong><br>这个计算随机层数的代码如下所示：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="function"><span class="type">int</span> <span class="title">randomLevel</span><span class="params">()</span> </span>&#123;</span><br><span class="line">    <span class="type">int</span> level = <span class="number">1</span>;</span><br><span class="line">    <span class="built_in">srand</span>((<span class="type">unsigned</span>) <span class="built_in">time</span>(<span class="literal">NULL</span>));</span><br><span class="line">    <span class="keyword">while</span> ((<span class="built_in">rand</span>() / <span class="built_in">double</span>(RAND_MAX)) &lt; p &amp;&amp; level &lt; MaxLevel) &#123;</span><br><span class="line">        level++;</span><br><span class="line">    &#125;</span><br><span class="line">    <span class="keyword">return</span> level;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-        <div class="article-info info-on-right">
-          
-          
+<p>randomLevel()的中包含两个参数，一个是p，一个是MaxLevel。在Redis的skiplist实现中，这两个参数的取值为：</p>
+<figure class="highlight c++"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p = <span class="number">1</span>/<span class="number">4</span> </span><br><span class="line">MaxLevel = <span class="number">32</span></span><br></pre></td></tr></table></figure></li>
+</ul>
+<h2 id="跳表的优势"><a href="#跳表的优势" class="headerlink" title="跳表的优势"></a>跳表的优势</h2><ul>
+<li>skiplist和各种平衡树（如AVL、红黑树等）的元素是有序排列的，而哈希表不是有序的。因此，<strong>在哈希表上只能做单个key的查找，不适宜做范围查找。</strong> 所谓范围查找，指的是查找那些大小在指定的两个值之间的所有节点</li>
+<li>在做范围查找的时候，平衡树比skiplist操作要复杂。在平衡树上，我们找到指定范围的小值之后，还需要以中序遍历的顺序继续寻找其它不超过大值的节点。如果不对平衡树进行一定的改造，这里的中序遍历并不容易实现。而在skiplist上进行范围查找就非常简单，只需要在找到小值之后，对第1层链表进行若干步的遍历就可以实现</li>
+<li>平衡树的插入和删除操作可能引发子树的调整，逻辑复杂，而<strong>skiplist的插入和删除只需要修改相邻节点的指针</strong>，操作简单又快速</li>
+<li>从内存占用上来说，skiplist比平衡树更灵活一些。一般来说，平衡树每个节点包含2个指针（分别指向左右子树），而skiplist每个节点包含的指针数目平均为1&#x2F;(1-p)，具体取决于参数p的大小。如果像Redis里的实现一样，取p&#x3D;1&#x2F;4，那么平均每个节点包含1.33个指针，比平衡树更有优势</li>
+<li>查找单个key，skiplist和平衡树的时间复杂度都为O(log n)，大体相当；而哈希表在保持较低的哈希值冲突概率的前提下，查找时间复杂度接近O(1)，性能更高一些。所以我们平常使用的各种Map或dictionary结构，大都是基于哈希表实现的</li>
+<li>从算法实现难度上来比较，skiplist比平衡树要简单得多</li>
+</ul>
+<p>完结撒花，除了好实现、范围查找优势，以及插入时相对稳定，跳表似乎并没啥特点。总结：学习了一个比较没用的数据结构。</p>
+<p>文章完结。。。诶且慢，事至如此，我不甘心相信，让我们做个不严谨小实验测试下：</p>
+<p>直接上结果：</p>
+<p><img src="/2022/10/30/skiplist/%E6%88%AA%E5%B1%8F2022-10-30%20%E4%B8%8A%E5%8D%881.16.33.png" alt="截屏2022-10-30 上午1.16.33"></p>
+<p>不严谨的测试确实看不出来啥。。。</p>
+<h3 id="实验代码如下："><a href="#实验代码如下：" class="headerlink" title="实验代码如下："></a>实验代码如下：</h3><blockquote>
+<p><a target="_blank" rel="noopener" href="https://github.com/loo-cq/test_skiplist">https://github.com/loo-cq/test_skiplist</a></p>
+</blockquote>
+<p>其中avl树代码来源于：<a target="_blank" rel="noopener" href="https://github.com/egaebel/AVL-Tree--Cplusplus">AVL-Tree–Cplusplus</a></p>
+<h2 id="参考链接："><a href="#参考链接：" class="headerlink" title="参考链接："></a>参考链接：</h2><ul>
+<li><a target="_blank" rel="noopener" href="https://juejin.cn/post/6844903446475177998">Redis 为什么用跳表而不用平衡树？</a></li>
+<li><a target="_blank" rel="noopener" href="https://blog.csdn.net/helloworld_ptt/article/details/105801262">SkipList(跳跃表)详解</a></li>
+</ul>
 
+      
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      
+      
+
+      
+
+      
+        
+<div class="share-btn share-icons tooltip-left">
+  <div class="tooltip tooltip-east">
+    <span class="tooltip-item">
+      <a href="javascript:;" class="share-sns share-outer">
+        <i class="icon icon-share"></i>
+      </a>
+    </span>
+    <span class="tooltip-content">
+      <div class="share-wrap">
+        <div class="share-icons">
+          <a class="weibo share-sns" href="javascript:;" data-type="weibo">
+            <i class="icon icon-weibo"></i>
+          </a>
+          <a class="weixin share-sns wxFab" href="javascript:;" data-type="weixin">
+            <i class="icon icon-weixin"></i>
+          </a>
+          <a class="qq share-sns" href="javascript:;" data-type="qq">
+            <i class="icon icon-qq"></i>
+          </a>
+          <a class="douban share-sns" href="javascript:;" data-type="douban">
+            <i class="icon icon-douban"></i>
+          </a>
+          <a class="qzone share-sns" href="javascript:;" data-type="qzone">
+            <i class="icon icon-qzone"></i>
+          </a>
+          <a class="facebook share-sns" href="javascript:;" data-type="facebook">
+            <i class="icon icon-facebook"></i>
+          </a>
+          <a class="twitter share-sns" href="javascript:;" data-type="twitter">
+            <i class="icon icon-twitter"></i>
+          </a>
+          <a class="google share-sns" href="javascript:;" data-type="google">
+            <i class="icon icon-google"></i>
+          </a>
         </div>
-        <div class="clearfix"></div>
-    </header>
+      </div>
+    </span>
+  </div>
+</div>
+
+<div class="page-modal wx-share js-wx-box">
+    <a class="close js-modal-close" href="javascript:;"><i class="icon icon-close"></i></a>
+    <p>扫一扫，分享到微信</p>
+    <div class="wx-qrcode">
+      <img src="//pan.baidu.com/share/qrcode?url=http://locq.scnu.work/2022/10/30/skiplist/" alt="微信分享二维码">
+    </div>
+</div>
+
+<div class="mask js-mask"></div>
+      
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
+
   
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/07/02/xv6-lab11/" class="archive-article-date">
-  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
-</a>
+<nav id="article-nav">
+  
+  
+    <a href="/2022/07/02/xv6-lab11/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">MIT6.S081 — Lab11</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+<aside class="wrap-side-operation">
+    <div class="mod-side-operation">
+        
+        <div class="jump-container" id="js-jump-container" style="display:none;">
+            <a href="javascript:void(0)" class="mod-side-operation__jump-to-top">
+                <i class="icon-font icon-back"></i>
+            </a>
+            <div id="js-jump-plan-container" class="jump-plan-container" style="top: -11px;">
+                <i class="icon-font icon-plane jump-plane"></i>
+            </div>
         </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/07/02/xv6-lab11/">MIT6.S081 — Lab11</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
+        
+        
+    </div>
+</aside>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/07/02/xv6-lab9/" class="archive-article-date">
-  	<time datetime="2022-07-02T06:40:35.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-07-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/07/02/xv6-lab9/">MIT6.S081 — Lab9</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/05/26/xv6-lab4/" class="archive-article-date">
-  	<time datetime="2022-05-25T19:40:49.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/05/26/xv6-lab4/">MIT6.S081 — Lab4</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/05/24/xv6-lab3/" class="archive-article-date">
-  	<time datetime="2022-05-24T13:33:10.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-24</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/05/24/xv6-lab3/">MIT6.S081 — Lab3</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/05/20/xv6-lab2/" class="archive-article-date">
-  	<time datetime="2022-05-20T12:27:04.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-05-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/05/20/xv6-lab2/">MIT6.S081 — Lab2</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/03/22/xv6-lab1/" class="archive-article-date">
-  	<time datetime="2022-03-21T23:27:09.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-22</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/03/22/xv6-lab1/">MIT6.S081 — Lab1</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/03/16/wiresharkhttps/" class="archive-article-date">
-  	<time datetime="2022-03-15T17:00:00.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-03-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/03/16/wiresharkhttps/">Wireshark调试chrome浏览器的https流量</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络//" class="article-tag-list-link color3">网络</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/网络/网络工具//" class="article-tag-list-link color5">网络工具</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2022/02/15/xv6/" class="archive-article-date">
-  	<time datetime="2022-02-15T07:38:20.000Z" itemprop="datePublished"><i class="icon-calendar icon"></i>2022-02-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2022/02/15/xv6/">xv6编译指南</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="javascript:void(0)" class="js-tag article-tag-list-link color3">记录</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-		<i class="icon-book icon"></i>
-		<ul class="article-tag-list">
-			 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记//" class="article-tag-list-link color5">学习笔记</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering//" class="article-tag-list-link color1">MIT-OperatingSystemEngineering</a>
-        		</li>
-      		 
-        		<li class="article-tag-list-item">
-        			<a href="/categories/学习笔记/MIT-OperatingSystemEngineering/Lab//" class="article-tag-list-link color4">Lab</a>
-        		</li>
-      		
-		</ul>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
   
   
-    </div></section>
   
 
-    
+  
+
+  
+
+  
 
 
           </div>
@@ -663,8 +368,8 @@
 	var yiliaConfig = {
 		mathjax: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
